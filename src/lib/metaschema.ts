@@ -3,20 +3,24 @@ import { XMLParser } from 'fast-xml-parser';
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/usnistgov/OSCAL';
 const GITHUB_API_BASE = 'https://api.github.com/repos/usnistgov/OSCAL';
 
-// Minimum OSCAL version to include (older releases predate the metaschema files we render).
-const MIN_VERSION: [number, number, number] = [1, 1, 2];
+type ParsedVersion = [number, number, number, string]; // [major, minor, patch, prerelease]
 
-function compareSemver(a: [number, number, number], b: [number, number, number]): number {
+function compareSemver(a: ParsedVersion, b: ParsedVersion): number {
   for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] - b[i];
+    if (a[i] !== b[i]) return (a[i] as number) - (b[i] as number);
   }
+  // A version without a prerelease outranks one with a prerelease (per semver).
+  if (a[3] === '' && b[3] !== '') return 1;
+  if (a[3] !== '' && b[3] === '') return -1;
+  if (a[3] < b[3]) return -1;
+  if (a[3] > b[3]) return 1;
   return 0;
 }
 
-function parseSemverTag(tag: string): [number, number, number] | null {
-  const m = /^v(\d+)\.(\d+)\.(\d+)$/.exec(tag);
+function parseSemverTag(tag: string): ParsedVersion | null {
+  const m = /^v(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/.exec(tag);
   if (!m) return null;
-  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), m[4] ?? ''];
 }
 
 let versionsPromise: Promise<string[]> | null = null;
@@ -29,8 +33,7 @@ export function getOscalVersions(): Promise<string[]> {
     if (process.env.GITHUB_TOKEN) headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
 
     const tags: { name: string }[] = [];
-    // Paginate; OSCAL has < 100 tags but be safe.
-    for (let page = 1; page <= 5; page++) {
+    for (let page = 1; page <= 10; page++) {
       const res = await fetch(`${GITHUB_API_BASE}/tags?per_page=100&page=${page}`, { headers });
       if (!res.ok) throw new Error(`Failed to fetch OSCAL tags: ${res.status} ${res.statusText}`);
       const batch = await res.json() as { name: string }[];
@@ -40,8 +43,7 @@ export function getOscalVersions(): Promise<string[]> {
 
     const versions = tags
       .map(t => ({ tag: t.name, parsed: parseSemverTag(t.name) }))
-      .filter((x): x is { tag: string; parsed: [number, number, number] } =>
-        x.parsed !== null && compareSemver(x.parsed, MIN_VERSION) >= 0)
+      .filter((x): x is { tag: string; parsed: ParsedVersion } => x.parsed !== null)
       .sort((a, b) => compareSemver(a.parsed, b.parsed))
       .map(x => x.tag);
 
@@ -374,6 +376,38 @@ export function parseMetaschemaXml(xml: string): ParsedMetaschema {
 
 // Cache for fetched metaschemas
 const cache = new Map<string, ParsedMetaschema>();
+const entityCache = new Map<string, string>();
+
+async function fetchEntity(baseUrl: string, relPath: string): Promise<string> {
+  const url = new URL(relPath, baseUrl).toString();
+  if (entityCache.has(url)) return entityCache.get(url)!;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch entity ${url}: ${res.statusText}`);
+  const text = await res.text();
+  entityCache.set(url, text);
+  return text;
+}
+
+// Resolve <!DOCTYPE ...> external entities so fast-xml-parser can read the document.
+async function resolveExternalEntities(xml: string, baseUrl: string): Promise<string> {
+  const doctypeMatch = xml.match(/<!DOCTYPE[^\[]*\[([\s\S]*?)\]\s*>/);
+  if (!doctypeMatch) return xml;
+  const decls = doctypeMatch[1];
+  const entityRe = /<!ENTITY\s+([\w-]+)\s+SYSTEM\s+"([^"]+)"\s*>/g;
+  const entities: { name: string; content: string }[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = entityRe.exec(decls)) !== null) {
+    const content = await fetchEntity(baseUrl, m[2]);
+    entities.push({ name: m[1], content });
+  }
+  // Strip the DOCTYPE.
+  let out = xml.replace(doctypeMatch[0], '');
+  // Substitute &name; references in body.
+  for (const ent of entities) {
+    out = out.split(`&${ent.name};`).join(ent.content);
+  }
+  return out;
+}
 
 export async function fetchMetaschema(version: string, filename: string): Promise<ParsedMetaschema> {
   // Map version tags to branch/tag names in git
@@ -386,7 +420,8 @@ export async function fetchMetaschema(version: string, filename: string): Promis
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
   }
-  const xml = await response.text();
+  const rawXml = await response.text();
+  const xml = await resolveExternalEntities(rawXml, url);
   const parsed = parseMetaschemaXml(xml);
   cache.set(key, parsed);
   return parsed;

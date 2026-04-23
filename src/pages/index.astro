@@ -1,33 +1,24 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getOscalVersions, getLatestVersion } from '../lib/metaschema';
+import { getLatestVersion } from '../lib/metaschema';
 
 const base = import.meta.env.BASE_URL;
-const OSCAL_VERSIONS = await getOscalVersions();
-const LATEST_VERSION = await getLatestVersion();
+const latest = await getLatestVersion();
+const target = `${base}${latest}/catalog/json/`;
 ---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={target} />
+    <title>OSCAL Model Reference</title>
+  </head>
+  <body>
+    <p>Redirecting to <a href={target}>the latest OSCAL reference</a>&hellip;</p>
+    <script set:html={`window.location.replace(${JSON.stringify(target)});`}></script>
+  </body>
+</html>
 
-<BaseLayout title="OSCAL Model Reference">
-  <h1>OSCAL Model Reference</h1>
-  <p style="color: var(--color-text-muted); margin-bottom: 2rem; max-width: 720px;">
-    Dynamically generated documentation from the
-    <a href="https://github.com/usnistgov/OSCAL/tree/main/src/metaschema" target="_blank" rel="noopener">OSCAL Metaschema</a>
-    source files. Select a version to explore the OSCAL models.
-  </p>
-
-  <h2>Available Versions</h2>
-  <div class="card-grid">
-    {OSCAL_VERSIONS.slice().reverse().map(version => (
-      <a href={`${base}models/${version}/`} class="card">
-        <h3>
-          {version}
-          {version === LATEST_VERSION && <span class="version-badge latest">Latest</span>}
-        </h3>
-        <p>Browse all OSCAL models for version {version}</p>
-      </a>
-    ))}
-  </div>
-</BaseLayout>
 ---
 
 ---

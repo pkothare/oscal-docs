@@ -53,6 +53,8 @@ const base = import.meta.env.BASE_URL;
     --color-type-field: #2ecc71;
     --color-type-flag: #f39c12;
     --color-code-bg: #0a1628;
+    --header-height: 60px;
+    --footer-height: 72px;
   }
 
   * {
@@ -63,6 +65,7 @@ const base = import.meta.env.BASE_URL;
 
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
@@ -134,6 +137,9 @@ const base = import.meta.env.BASE_URL;
     color: var(--color-text-muted);
     font-size: 0.875rem;
     margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
   }
 
   h1 {
@@ -342,7 +348,7 @@ const base = import.meta.env.BASE_URL;
     margin: 0.5rem 0;
   }
 
-  .constraint-list li {
+  .constraint-list > li {
     padding: 0.5rem 0.75rem;
     background: var(--color-bg-darker);
     border-radius: 4px;
@@ -362,7 +368,8 @@ const base = import.meta.env.BASE_URL;
 
   .enum-list {
     list-style: none;
-    margin: 0.5rem 0;
+    margin: 0.5rem 0 0;
+    padding-left: 1rem;
   }
 
   .enum-list li {
@@ -410,10 +417,15 @@ const base = import.meta.env.BASE_URL;
     gap: 2rem;
   }
 
+  .sidebar-layout > .content {
+    grid-column: 2;
+  }
+
   .sidebar {
-    position: sticky;
-    top: 60px;
-    max-height: calc(100vh - 80px);
+    position: fixed;
+    top: var(--header-height, 60px);
+    bottom: var(--footer-height, 60px);
+    width: 260px;
     overflow-y: auto;
     padding-right: 1rem;
   }
@@ -445,6 +457,22 @@ const base = import.meta.env.BASE_URL;
   .sidebar-link:hover, .sidebar-link.active {
     background: var(--color-bg-card);
     color: var(--color-accent);
+  }
+
+  .version-select {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    background: var(--color-bg-card);
+    color: var(--color-text);
+    border: 1px solid var(--color-border, #1a3050);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .version-select:focus {
+    outline: none;
+    border-color: var(--color-accent);
   }
 
   @media (max-width: 768px) {

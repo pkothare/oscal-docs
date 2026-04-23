@@ -4,5 +4,6 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://pkothare.github.io',
-  base: '/oscal-docs',
+  base: '/oscal-docs/',
+  trailingSlash: 'always',
 });

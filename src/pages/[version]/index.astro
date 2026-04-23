@@ -1,6 +1,6 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getOscalVersions, getLatestVersion, MODEL_FILES, MODEL_DISPLAY_NAMES } from '../../../lib/metaschema';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getOscalVersions, getLatestVersion, MODEL_FILES, MODEL_DISPLAY_NAMES } from '../../lib/metaschema';
 
 export async function getStaticPaths() {
   const versions = await getOscalVersions();
@@ -32,7 +32,7 @@ const LATEST_VERSION = await getLatestVersion();
   <h2>Other Versions</h2>
   <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
     {OSCAL_VERSIONS.map(v => (
-      <a href={`${base}models/${v}/`}
+      <a href={`${base}${v}/`}
          class="format-tab"
          class:list={[v === version && 'active']}>
         {v}
@@ -44,7 +44,7 @@ const LATEST_VERSION = await getLatestVersion();
   <h2>Models</h2>
   <div class="card-grid">
     {models.map(slug => (
-      <a href={`${base}models/${version}/${slug}/json-reference/`} class="card">
+      <a href={`${base}${version}/${slug}/json/`} class="card">
         <h3>{MODEL_DISPLAY_NAMES[slug]}</h3>
         <p>View the {MODEL_DISPLAY_NAMES[slug]} model reference</p>
       </a>
