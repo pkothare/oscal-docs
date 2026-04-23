@@ -188,7 +188,7 @@ function parseFlags(node: any): FieldDef[] {
   return flags;
 }
 
-function parseModelItems(modelNode: any): ModelItem[] {
+function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): ModelItem[] {
   if (!modelNode) return [];
   const model = Array.isArray(modelNode) ? modelNode[0] : modelNode;
   if (!model) return [];
@@ -213,18 +213,34 @@ function parseModelItems(modelNode: any): ModelItem[] {
     }
   }
 
-  // Handle inline define-assembly and define-field inside model
+  // Handle inline define-assembly and define-field inside model.
+  // Promote them to top-level definitions (so they get their own anchor section)
+  // and reference them from the model item via `ref`.
   for (const key of ['define-assembly', 'define-field']) {
     const entries = model[key];
     if (entries) {
       const arr = Array.isArray(entries) ? entries : [entries];
       for (const entry of arr) {
         const groupAs = entry['group-as'];
+        const name = entry['@_name'] || '';
+        const itemType: 'assembly' | 'field' = key === 'define-assembly' ? 'assembly' : 'field';
+
+        if (collected && name) {
+          collected.push({
+            name,
+            formalName: extractText(entry['formal-name']?.[0] || entry['formal-name']),
+            description: extractText(entry['description']?.[0] || entry['description']),
+            remarks: entry['remarks'] ? extractText(entry['remarks'][0] || entry['remarks']) : undefined,
+            flags: parseFlags(entry),
+            modelItems: itemType === 'assembly' ? parseModelItems(entry['model'], collected) : [],
+            constraints: parseConstraints(entry['constraint']),
+            type: itemType,
+          });
+        }
+
         items.push({
-          name: entry['@_name'],
-          formalName: extractText(entry['formal-name']?.[0] || entry['formal-name']),
-          description: extractText(entry['description']?.[0] || entry['description']),
-          type: key === 'define-assembly' ? 'assembly' : 'field',
+          ref: name,
+          type: itemType,
           minOccurs: entry['@_min-occurs'] ? parseInt(entry['@_min-occurs']) : undefined,
           maxOccurs: entry['@_max-occurs'] === 'unbounded' ? 'unbounded' : entry['@_max-occurs'] ? parseInt(entry['@_max-occurs']) : undefined,
           groupAs: groupAs ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_name'] : undefined,
@@ -239,7 +255,7 @@ function parseModelItems(modelNode: any): ModelItem[] {
   if (choices) {
     const choiceArr = Array.isArray(choices) ? choices : [choices];
     for (const choice of choiceArr) {
-      items.push(...parseModelItems(choice));
+      items.push(...parseModelItems(choice, collected));
     }
   }
 
@@ -326,7 +342,7 @@ export function parseMetaschemaXml(xml: string): ParsedMetaschema {
         description: extractText(a['description']?.[0] || a['description']),
         remarks: a['remarks'] ? extractText(a['remarks'][0] || a['remarks']) : undefined,
         flags: parseFlags(a),
-        modelItems: parseModelItems(a['model']),
+        modelItems: parseModelItems(a['model'], definitions),
         constraints: parseConstraints(a['constraint']),
         isRoot: !!a['root-name'],
         rootName: a['root-name'] ? extractText(a['root-name']) : undefined,

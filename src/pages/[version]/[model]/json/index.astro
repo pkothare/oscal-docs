@@ -1,10 +1,16 @@
 ---
-import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import ModelSidebar from "../../../../components/ModelSidebar.astro";
+import JsonOutline from "../../../../components/JsonOutline.astro";
+import JsonDefinitionSection from "../../../../components/JsonDefinitionSection.astro";
 import {
-  getOscalVersions, getLatestVersion, MODEL_FILES, MODEL_DISPLAY_NAMES,
+  getOscalVersions,
+  MODEL_FILES,
+  MODEL_DISPLAY_NAMES,
   resolveModel,
-  type ResolvedModel, type MetaschemaDefinition, type ModelItem
-} from '../../../../lib/metaschema';
+  type ResolvedModel,
+  type ModelItem,
+} from "../../../../lib/metaschema";
 
 export async function getStaticPaths() {
   const versions = await getOscalVersions();
@@ -19,8 +25,6 @@ export async function getStaticPaths() {
 
 const { version, model: modelSlug } = Astro.params;
 const base = import.meta.env.BASE_URL;
-const OSCAL_VERSIONS = await getOscalVersions();
-const LATEST_VERSION = await getLatestVersion();
 
 let resolved: ResolvedModel;
 let error: string | null = null;
@@ -37,291 +41,81 @@ try {
 }
 
 const rootDef = resolved.rootDefinition;
-const otherDefs = resolved.definitions.filter(d => d !== rootDef);
+const otherDefs = resolved.definitions.filter((d) => d !== rootDef);
+const defMap = new Map(resolved.definitions.map((d) => [d.name, d]));
 
-// Build a map for quick lookup
-const defMap = new Map(resolved.definitions.map(d => [d.name, d]));
-
-function getCardinality(item: ModelItem): string {
-  const min = item.minOccurs ?? 0;
-  const max = item.maxOccurs;
-  if (max === 'unbounded') return `[${min} to ∞]`;
-  if (max !== undefined) return `[${min} to ${max}]`;
-  if (min === 1) return '[1]';
-  return '[0 or 1]';
+// JSON serialization name of a model item (group-as for arrays/maps, otherwise ref/name).
+function jsonName(item: ModelItem): string {
+  return item.groupAs || item.ref || item.name || "";
+}
+function typeName(item: ModelItem): string {
+  return item.ref || item.name || "";
 }
 
-function getRefDisplayName(item: ModelItem): string {
-  if (item.ref) {
-    const ref = defMap.get(item.ref);
-    return ref?.formalName || item.ref;
+// Collect alternate JSON names that point at each def, so we can emit anchor aliases.
+const aliasesByDef = new Map<string, string[]>();
+function collectAliases(items: ModelItem[]) {
+  for (const item of items) {
+    const target = typeName(item);
+    const json = jsonName(item);
+    if (target && json && json !== target) {
+      const set = aliasesByDef.get(target) ?? [];
+      if (!set.includes(json)) set.push(json);
+      aliasesByDef.set(target, set);
+    }
   }
-  return item.formalName || item.name || '';
 }
+if (rootDef) collectAliases(rootDef.modelItems);
+for (const def of otherDefs) collectAliases(def.modelItems);
 ---
 
-<BaseLayout title={`${resolved.displayName} - JSON Reference - ${version}`} version={version} model={modelSlug}>
+<BaseLayout
+  title={`${resolved.displayName} - JSON Reference - ${version}`}
+  version={version}
+  model={modelSlug}
+  format="json"
+>
   <div class="sidebar-layout">
-    <aside class="sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-title">Version</div>
-        <select class="version-select" onchange="if(this.value)window.location.href=this.value">
-          {OSCAL_VERSIONS.slice().reverse().map(v => (
-            <option value={`${base}${v}/${modelSlug}/json/`} selected={v === version}>
-              {v}{v === LATEST_VERSION ? ' (latest)' : ''}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-title">Models</div>
-        {Object.entries(MODEL_DISPLAY_NAMES).map(([slug, name]) => (
-          <a href={`${base}${version}/${slug}/json/`}
-             class:list={['sidebar-link', slug === modelSlug && 'active']}>
-            {name}
-          </a>
-        ))}
-      </div>
-
-      {rootDef && (
-        <div class="sidebar-section">
-          <div class="sidebar-title">Structure</div>
-          <a href={`#${rootDef.name}`} class="sidebar-link">{rootDef.formalName}</a>
-          {rootDef.modelItems.map(item => (
-            <a href={`#${item.ref || item.name}`} class="sidebar-link" style="padding-left: 1rem;">
-              {item.groupAs || item.ref || item.name}
-            </a>
-          ))}
-        </div>
-      )}
-
-      <div class="sidebar-section">
-        <div class="sidebar-title">Definitions</div>
-        {otherDefs.map(def => (
-          <a href={`#${def.name}`} class="sidebar-link">
-            {def.formalName || def.name}
-          </a>
-        ))}
-      </div>
-    </aside>
+    <ModelSidebar
+      base={base}
+      version={version!}
+      modelSlug={modelSlug!}
+      format="json"
+      definitions={otherDefs}
+    />
 
     <div class="content">
-      <h1>{resolved.displayName} Model {version} JSON Format Reference</h1>
+      <h1>{resolved.displayName}</h1>
 
-      {error && (
-        <div class="def-remarks" style="border-left-color: #e74c3c; margin-bottom: 1rem;">
-          Error loading metaschema: {error}
-        </div>
-      )}
-
-      <div class="format-tabs">
-        <span class="format-tab active">JSON Reference</span>
-        <a href={`${base}${version}/${modelSlug}/xml/`} class="format-tab">XML Reference</a>
-      </div>
-
-      {rootDef && (
-        <section id={rootDef.name} class="def-section">
-          <div class="def-header">
-            <span class="def-name">{rootDef.rootName || rootDef.name}</span>
-            <span class="type-badge assembly">assembly</span>
-            {rootDef.isRoot && <span class="version-badge">root</span>}
+      {
+        error && (
+          <div
+            class="def-remarks"
+            style="border-left-color: var(--brand-secondary); margin-bottom: 1rem;"
+          >
+            Error loading metaschema: {error}
           </div>
-          <div class="def-description">
-            <strong>DESCRIPTION</strong> {rootDef.description}
-          </div>
-          {rootDef.remarks && (
-            <div class="def-remarks">
-              <strong>Remarks</strong><br />{rootDef.remarks}
-            </div>
-          )}
+        )
+      }
 
-          {rootDef.flags.length > 0 && (
-            <div>
-              <h3>Attributes</h3>
-              <table class="property-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rootDef.flags.map(flag => (
-                    <tr>
-                      <td><code>{flag.name}</code></td>
-                      <td><span class="type-badge flag">{flag.asType || 'string'}</span></td>
-                      <td>{flag.required ? 'Yes' : 'No'}</td>
-                      <td>{flag.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {
+        rootDef && rootDef.modelItems.length > 0 && (
+          <JsonOutline rootDef={rootDef} defMap={defMap} />
+        )
+      }
 
-          {rootDef.modelItems.length > 0 && (
-            <div>
-              <h3>Properties ({rootDef.modelItems.length})</h3>
-              <table class="property-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Cardinality</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rootDef.modelItems.map(item => {
-                    const refDef = item.ref ? defMap.get(item.ref) : null;
-                    return (
-                      <tr>
-                        <td>
-                          <a href={`#${item.ref || item.name}`}>
-                            <code>{item.groupAs || item.ref || item.name}</code>
-                          </a>
-                        </td>
-                        <td><span class:list={['type-badge', item.type]}>{item.type}</span></td>
-                        <td><span class="cardinality">{getCardinality(item)}</span></td>
-                        <td>{refDef?.description || item.description || ''}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {rootDef.constraints.length > 0 && (
-            <div>
-              <h3>Constraints ({rootDef.constraints.length})</h3>
-              <ul class="constraint-list">
-                {rootDef.constraints.map(c => (
-                  <li>
-                    <span class="constraint-type">{c.type}</span>
-                    {c.target && <span> for <code>{c.target}</code></span>}
-                    {c.description && <span> — {c.description}</span>}
-                    {c.values && c.values.length > 0 && (
-                      <ul class="enum-list">
-                        {c.values.map(v => (
-                          <li>
-                            <span class="enum-value">{v.value}</span>: {v.description}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      )}
+      {rootDef && <JsonDefinitionSection def={rootDef} defMap={defMap} asRoot />}
 
       <h2>Definitions ({otherDefs.length})</h2>
-      {otherDefs.map(def => (
-        <section id={def.name} class="def-section">
-          <div class="def-header">
-            <span class="def-name">{def.name}</span>
-            <span class:list={['type-badge', def.type]}>{def.type}</span>
-          </div>
-          <div style="margin-bottom: 0.25rem; color: var(--color-text-heading); font-weight: 500;">
-            {def.formalName}
-          </div>
-          <div class="def-description">
-            {def.description}
-          </div>
-          {def.remarks && (
-            <div class="def-remarks">{def.remarks}</div>
-          )}
-
-          {def.flags.length > 0 && (
-            <div>
-              <h3>Attributes</h3>
-              <table class="property-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {def.flags.map(flag => (
-                    <tr>
-                      <td><code>{flag.name}</code></td>
-                      <td><span class="type-badge flag">{flag.asType || 'string'}</span></td>
-                      <td>{flag.required ? 'Yes' : 'No'}</td>
-                      <td>{flag.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {def.modelItems.length > 0 && (
-            <div>
-              <h3>Properties ({def.modelItems.length})</h3>
-              <table class="property-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Cardinality</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {def.modelItems.map(item => {
-                    const refDef = item.ref ? defMap.get(item.ref) : null;
-                    return (
-                      <tr>
-                        <td>
-                          <a href={`#${item.ref || item.name}`}>
-                            <code>{item.groupAs || item.ref || item.name}</code>
-                          </a>
-                        </td>
-                        <td><span class:list={['type-badge', item.type]}>{item.type}</span></td>
-                        <td><span class="cardinality">{getCardinality(item)}</span></td>
-                        <td>{refDef?.description || item.description || ''}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {def.constraints.length > 0 && (
-            <div>
-              <h3>Constraints ({def.constraints.length})</h3>
-              <ul class="constraint-list">
-                {def.constraints.map(c => (
-                  <li>
-                    <span class="constraint-type">{c.type}</span>
-                    {c.target && <span> for <code>{c.target}</code></span>}
-                    {c.description && <span> — {c.description}</span>}
-                    {c.values && c.values.length > 0 && (
-                      <ul class="enum-list">
-                        {c.values.map(v => (
-                          <li>
-                            <span class="enum-value">{v.value}</span>: {v.description}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      ))}
+      {
+        otherDefs.map((def) => (
+          <JsonDefinitionSection
+            def={def}
+            defMap={defMap}
+            aliases={aliasesByDef.get(def.name) ?? []}
+          />
+        ))
+      }
     </div>
   </div>
 </BaseLayout>

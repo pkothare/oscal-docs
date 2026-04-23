@@ -1,0 +1,44 @@
+---
+import type { FieldDef } from "../lib/metaschema";
+
+interface Props {
+  flags: FieldDef[];
+  /** Optional prefix shown before each flag name (e.g. "@" for XML attributes). */
+  prefix?: string;
+}
+
+const { flags, prefix = "" } = Astro.props;
+---
+
+<div>
+  <h3>Attributes</h3>
+  <table class="property-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        flags.map((flag) => (
+          <tr>
+            <td>
+              <code>
+                {prefix}
+                {flag.name}
+              </code>
+            </td>
+            <td>
+              <span class="type-badge flag">{flag.asType || "string"}</span>
+            </td>
+            <td>{flag.required ? "Yes" : "No"}</td>
+            <td>{flag.description}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

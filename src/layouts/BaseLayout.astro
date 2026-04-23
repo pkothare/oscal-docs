@@ -1,12 +1,18 @@
 ---
+import { getOscalVersions, getLatestVersion } from "../lib/metaschema";
+
 export interface Props {
   title: string;
   version?: string;
   model?: string;
+  format?: "json" | "xml";
 }
 
-const { title, version, model } = Astro.props;
+const { title, version, model, format } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+const versions = version ? await getOscalVersions() : [];
+const latest = version ? await getLatestVersion() : "";
 ---
 
 <!doctype html>
@@ -16,12 +22,52 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} | OSCAL Foundation Docs</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Roboto:wght@300;400;500;700&display=swap"
+    />
   </head>
   <body>
     <header>
       <nav class="top-nav">
-        <a href={base} class="logo">OSCAL Foundation</a>
+        <a href={base} class="logo">
+          <img src={`${base}oscal-logo.png`} alt="OSCAL Foundation" />
+        </a>
         <span class="nav-subtitle">Model Reference Documentation</span>
+        {version && model && format && (
+          <div class="header-controls">
+            <div class="format-toggle">
+              <a
+                href={`${base}${version}/${model}/json/`}
+                class:list={["format-toggle-btn", format === "json" && "active"]}
+              >JSON</a>
+              <a
+                href={`${base}${version}/${model}/xml/`}
+                class:list={["format-toggle-btn", format === "xml" && "active"]}
+              >XML</a>
+            </div>
+            <select
+              class="version-select header-version-select"
+              onchange="if(this.value)window.location.href=this.value"
+              aria-label="OSCAL version"
+            >
+              {versions
+                .slice()
+                .reverse()
+                .map((v) => (
+                  <option
+                    value={`${base}${v}/${model}/${format}/`}
+                    selected={v === version}
+                  >
+                    {v}
+                    {v === latest ? " (latest)" : ""}
+                  </option>
+                ))}
+            </select>
+          </div>
+        )}
       </nav>
     </header>
     <main>
@@ -30,31 +76,65 @@ const base = import.meta.env.BASE_URL;
     <footer>
       <p>Generated from <a href="https://github.com/usnistgov/OSCAL" target="_blank" rel="noopener">OSCAL Metaschema</a> sources. An <a href="https://oscalfoundation.org/" target="_blank" rel="noopener">OSCAL Foundation</a> project.</p>
     </footer>
+    <script is:inline>
+      (function () {
+        function updateFragmentActive() {
+          var hash = window.location.hash;
+          document.querySelectorAll('.sidebar-link.fragment-active').forEach(function (el) {
+            el.classList.remove('fragment-active');
+          });
+          if (!hash || hash.length < 2) return;
+          document.querySelectorAll('.sidebar-link').forEach(function (el) {
+            var href = el.getAttribute('href') || '';
+            var idx = href.indexOf('#');
+            if (idx >= 0 && href.slice(idx) === hash) {
+              el.classList.add('fragment-active');
+            }
+          });
+        }
+        window.addEventListener('hashchange', updateFragmentActive);
+        document.addEventListener('DOMContentLoaded', updateFragmentActive);
+        updateFragmentActive();
+      })();
+    </script>
   </body>
 </html>
 
 <style is:global>
-  /* OSCAL Foundation Color Scheme */
+  /* OSCAL Foundation brand palette */
   :root {
-    --color-bg-dark: #0b1a2e;
-    --color-bg-darker: #071222;
-    --color-bg-card: #0f2340;
-    --color-bg-card-hover: #153058;
-    --color-accent: #00b4d8;
-    --color-accent-light: #48cae4;
-    --color-accent-dim: #0096b7;
-    --color-text: #e0e7ef;
-    --color-text-muted: #8899aa;
-    --color-text-heading: #ffffff;
-    --color-border: #1a3355;
-    --color-success: #2ecc71;
-    --color-warning: #f39c12;
-    --color-type-assembly: #48cae4;
-    --color-type-field: #2ecc71;
-    --color-type-flag: #f39c12;
-    --color-code-bg: #0a1628;
+    --brand-primary: #4e79d8;
+    --brand-secondary: #223152;
+    --brand-text: #121212;
+    --brand-accent: #d2dcf3;
+
+    --brand-primary-dark: #3a5fb5;
+    --brand-primary-light: #7a96e3;
+    --brand-accent-soft: #eaf0fb;
+    --brand-secondary-soft: #3a4a73;
+
+    --color-bg-dark: #ffffff;
+    --color-bg-darker: var(--brand-secondary);
+    --color-bg-card: #ffffff;
+    --color-bg-card-hover: var(--brand-accent-soft);
+    --color-accent: var(--brand-primary);
+    --color-accent-light: var(--brand-primary-light);
+    --color-accent-dim: var(--brand-primary-dark);
+    --color-text: var(--brand-text);
+    --color-text-muted: #4a5568;
+    --color-text-heading: var(--brand-secondary);
+    --color-border: var(--brand-accent);
+    --color-success: #2f7d4a;
+    --color-warning: #b65d12;
+    --color-type-assembly: var(--brand-primary);
+    --color-type-field: var(--brand-secondary);
+    --color-type-flag: var(--brand-primary-light);
+    --color-code-bg: var(--brand-accent-soft);
     --header-height: 60px;
     --footer-height: 72px;
+
+    --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
   * {
@@ -64,14 +144,14 @@ const base = import.meta.env.BASE_URL;
   }
 
   html {
-    scroll-behavior: smooth;
-    color-scheme: dark;
+    scroll-behavior: auto;
+    color-scheme: light;
   }
 
   body {
     background: var(--color-bg-dark);
     color: var(--color-text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
@@ -89,11 +169,19 @@ const base = import.meta.env.BASE_URL;
   }
 
   header {
-    background: var(--color-bg-darker);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--brand-accent-soft);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--brand-accent);
     position: sticky;
     top: 0;
     z-index: 100;
+  }
+
+  header a {
+    color: var(--color-text-heading);
+  }
+  header a:hover {
+    color: var(--brand-primary);
   }
 
   .top-nav {
@@ -105,19 +193,75 @@ const base = import.meta.env.BASE_URL;
     gap: 1.5rem;
   }
 
-  .logo {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-text-heading);
-    letter-spacing: -0.02em;
+  .header-controls {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .logo:hover {
-    color: var(--color-accent);
+  .format-toggle {
+    display: inline-flex;
+    border: 1px solid var(--brand-accent);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .format-toggle-btn {
+    flex: 0 0 auto;
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    min-width: 3.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .format-toggle-btn + .format-toggle-btn {
+    border-left: 1px solid var(--brand-accent);
+  }
+
+  .format-toggle-btn:hover {
+    background: var(--brand-accent-soft);
+    color: var(--brand-primary);
+  }
+
+  .format-toggle-btn.active {
+    background: var(--brand-primary);
+    color: #ffffff;
+  }
+
+  .header-version-select {
+    width: auto;
+    min-width: 8rem;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .logo img {
+    display: block;
+    height: 32px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  .logo:hover img {
+    opacity: 0.85;
   }
 
   .nav-subtitle {
-    color: var(--color-text-muted);
+    color: var(--brand-secondary);
     font-size: 0.875rem;
   }
 
@@ -130,16 +274,23 @@ const base = import.meta.env.BASE_URL;
   }
 
   footer {
-    background: var(--color-bg-darker);
-    border-top: 1px solid var(--color-border);
+    background: var(--brand-accent-soft);
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--brand-accent);
     padding: 1.5rem;
     text-align: center;
-    color: var(--color-text-muted);
     font-size: 0.875rem;
     margin-top: auto;
     position: sticky;
     bottom: 0;
     z-index: 100;
+  }
+
+  footer a {
+    color: var(--brand-primary);
+  }
+  footer a:hover {
+    color: var(--brand-primary-dark);
   }
 
   h1 {
@@ -255,21 +406,21 @@ const base = import.meta.env.BASE_URL;
   }
 
   .type-badge.assembly {
-    background: rgba(72, 202, 228, 0.15);
+    background: var(--brand-accent-soft);
     color: var(--color-type-assembly);
-    border: 1px solid rgba(72, 202, 228, 0.3);
+    border: 1px solid var(--brand-accent);
   }
 
   .type-badge.field {
-    background: rgba(46, 204, 113, 0.15);
+    background: var(--brand-accent-soft);
     color: var(--color-type-field);
-    border: 1px solid rgba(46, 204, 113, 0.3);
+    border: 1px solid var(--brand-accent);
   }
 
   .type-badge.flag {
-    background: rgba(243, 156, 18, 0.15);
+    background: var(--brand-accent-soft);
     color: var(--color-type-flag);
-    border: 1px solid rgba(243, 156, 18, 0.3);
+    border: 1px solid var(--brand-accent);
   }
 
   .def-section {
@@ -292,7 +443,7 @@ const base = import.meta.env.BASE_URL;
     font-size: 1.15rem;
     font-weight: 600;
     color: var(--color-text-heading);
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-family: var(--font-mono);
   }
 
   .def-description {
@@ -301,12 +452,12 @@ const base = import.meta.env.BASE_URL;
   }
 
   .def-remarks {
-    color: var(--color-text-muted);
+    color: var(--color-text);
     font-size: 0.875rem;
     padding: 0.75rem;
-    background: var(--color-bg-darker);
+    background: var(--brand-accent-soft);
     border-radius: 4px;
-    border-left: 3px solid var(--color-accent-dim);
+    border-left: 3px solid var(--color-accent);
     margin-top: 0.75rem;
   }
 
@@ -320,8 +471,8 @@ const base = import.meta.env.BASE_URL;
   .property-table th {
     text-align: left;
     padding: 0.6rem 0.75rem;
-    background: var(--color-bg-darker);
-    color: var(--color-text-muted);
+    background: var(--brand-accent-soft);
+    color: var(--color-text-heading);
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -340,7 +491,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   .property-table tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--brand-accent-soft);
   }
 
   .constraint-list {
@@ -350,7 +501,7 @@ const base = import.meta.env.BASE_URL;
 
   .constraint-list > li {
     padding: 0.5rem 0.75rem;
-    background: var(--color-bg-darker);
+    background: var(--brand-accent-soft);
     border-radius: 4px;
     margin: 0.25rem 0;
     font-size: 0.875rem;
@@ -378,15 +529,15 @@ const base = import.meta.env.BASE_URL;
   }
 
   .enum-value {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    color: var(--color-accent-light);
+    font-family: var(--font-mono);
+    color: var(--color-accent-dim);
     font-weight: 500;
   }
 
   .cardinality {
     color: var(--color-text-muted);
     font-size: 0.8rem;
-    font-family: monospace;
+    font-family: var(--font-mono);
   }
 
   .format-tabs {
@@ -454,9 +605,21 @@ const base = import.meta.env.BASE_URL;
     margin: 0.1rem 0;
   }
 
-  .sidebar-link:hover, .sidebar-link.active {
+  .sidebar-link:hover {
     background: var(--color-bg-card);
     color: var(--color-accent);
+  }
+
+  .sidebar-link.active,
+  .sidebar-link.fragment-active {
+    background: var(--brand-accent);
+    color: var(--brand-secondary);
+  }
+
+  .sidebar-link.active:hover,
+  .sidebar-link.fragment-active:hover {
+    background: var(--brand-accent);
+    color: var(--brand-secondary);
   }
 
   .version-select {
@@ -486,5 +649,80 @@ const base = import.meta.env.BASE_URL;
     .card-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  .outline-section {
+    margin-bottom: 2rem;
+  }
+  .outline-intro {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0.75rem;
+  }
+  .outline-block {
+    background: var(--color-bg-card, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-mono, "Roboto Mono", monospace);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .outline-block code {
+    background: var(--brand-accent-soft, transparent);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: inherit;
+    color: var(--brand-primary-dark, var(--brand-primary));
+  }
+  .outline-block a {
+    color: var(--brand-primary-dark, var(--brand-primary));
+    text-decoration: none;
+  }
+  .outline-block a code {
+    transition: background 0.1s ease;
+  }
+  .outline-block a:hover code {
+    background: var(--brand-accent, var(--brand-accent-soft));
+    text-decoration: none;
+  }
+  .outline-card {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+  }
+  .outline-node > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-left: 1.1rem;
+  }
+  .outline-node > summary::-webkit-details-marker {
+    display: none;
+  }
+  .outline-node > summary::before {
+    content: "▶";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    transition: transform 0.1s ease;
+    transform-origin: 40% 55%;
+  }
+  .outline-node[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  .outline-children {
+    padding-left: 1.5rem;
+    border-left: 1px dotted var(--color-border);
+    margin-left: 0.35rem;
+  }
+  .outline-close {
+    padding-left: 1.1rem;
+  }
+  .outline-leaf {
+    padding-left: 1.1rem;
   }
 </style>

@@ -1,0 +1,38 @@
+---
+import type { ConstraintDef } from "../lib/metaschema";
+
+interface Props {
+  constraints: ConstraintDef[];
+}
+
+const { constraints } = Astro.props;
+---
+
+<div>
+  <h3>Constraints ({constraints.length})</h3>
+  <ul class="constraint-list">
+    {
+      constraints.map((c) => (
+        <li>
+          <span class="constraint-type">{c.type}</span>
+          {c.target && (
+            <span>
+              {" "}
+              for <code>{c.target}</code>
+            </span>
+          )}
+          {c.description && <span> — {c.description}</span>}
+          {c.values && c.values.length > 0 && (
+            <ul class="enum-list">
+              {c.values.map((v) => (
+                <li>
+                  <span class="enum-value">{v.value}</span>: {v.description}
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</div>

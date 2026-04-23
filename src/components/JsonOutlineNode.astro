@@ -1,0 +1,96 @@
+---
+import Self from "./JsonOutlineNode.astro";
+import type { ModelItem, MetaschemaDefinition } from "../lib/metaschema";
+
+interface Props {
+  item: ModelItem;
+  defMap: Map<string, MetaschemaDefinition>;
+  ancestors: Set<string>;
+  depth: number;
+  isLast?: boolean;
+}
+
+const { item, defMap, ancestors, depth, isLast } = Astro.props;
+
+function jsonName(it: ModelItem): string {
+  return it.groupAs || it.ref || it.name || "";
+}
+function typeName(it: ModelItem): string {
+  return it.ref || it.name || "";
+}
+function cardinality(it: ModelItem): string {
+  const min = it.minOccurs ?? 0;
+  const max = it.maxOccurs;
+  if (max === "unbounded") return `[${min} to ∞]`;
+  if (max !== undefined) return `[${min} to ${max}]`;
+  if (min === 1) return "[1]";
+  return "[0 or 1]";
+}
+
+const jn = jsonName(item);
+const tn = typeName(item);
+const refDef = tn ? defMap.get(tn) : null;
+const card = cardinality(item);
+const isArray = !!item.groupAs;
+const isAssembly =
+  item.type === "assembly" && !!refDef && refDef.modelItems.length > 0;
+const isCycle = refDef ? ancestors.has(refDef.name) : false;
+const tooDeep = depth > 12;
+const canExpand = isAssembly && !isCycle && !tooDeep;
+const childAncestors = refDef
+  ? new Set([...ancestors, refDef.name])
+  : ancestors;
+const tail = isLast ? "" : ",";
+const href = refDef ? `#${refDef.name}` : null;
+const openByDefault = depth < 1;
+const open = openByDefault ? "" : undefined;
+
+const openBrace = isArray ? "[ {" : "{";
+const closeBrace = isArray ? `} ]${tail}` : `}${tail}`;
+const collapsedRhs = isArray
+  ? "[ ... ]"
+  : refDef && refDef.modelItems.length > 0
+    ? "{ ... }"
+    : tn;
+---
+
+{
+  canExpand ? (
+    <details open={open === "" ? true : undefined} class="outline-node">
+      <summary>
+        {href ? (
+          <a href={href}>
+            <code>{jn}</code>
+          </a>
+        ) : (
+          <code>{jn}</code>
+        )}{" "}
+        <span class="outline-card">{card}</span>: {openBrace}
+      </summary>
+      <div class="outline-children">
+        {refDef!.modelItems.map((c, i) => (
+          <Self
+            item={c}
+            defMap={defMap}
+            ancestors={childAncestors}
+            depth={depth + 1}
+            isLast={i === refDef!.modelItems.length - 1}
+          />
+        ))}
+      </div>
+      <div class="outline-close">{closeBrace}</div>
+    </details>
+  ) : (
+    <div class="outline-leaf">
+      {href ? (
+        <a href={href}>
+          <code>{jn}</code>
+        </a>
+      ) : (
+        <code>{jn}</code>
+      )}{" "}
+      <span class="outline-card">{card}</span>: {collapsedRhs}
+      {tail}
+    </div>
+  )
+}

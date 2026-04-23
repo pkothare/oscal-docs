@@ -1,0 +1,80 @@
+---
+import Self from "./XmlOutlineNode.astro";
+import type { ModelItem, MetaschemaDefinition } from "../lib/metaschema";
+
+interface Props {
+  item: ModelItem;
+  defMap: Map<string, MetaschemaDefinition>;
+  ancestors: Set<string>;
+  depth: number;
+}
+
+const { item, defMap, ancestors, depth } = Astro.props;
+
+function tagName(it: ModelItem): string {
+  return it.ref || it.name || "";
+}
+function cardinality(it: ModelItem): string {
+  const min = it.minOccurs ?? 0;
+  const max = it.maxOccurs;
+  if (max === "unbounded") return `[${min} to ∞]`;
+  if (max !== undefined) return `[${min} to ${max}]`;
+  if (min === 1) return "[1]";
+  return "[0 or 1]";
+}
+
+const tag = tagName(item);
+const refDef = tag ? defMap.get(tag) : null;
+const card = cardinality(item);
+const isAssembly =
+  item.type === "assembly" && !!refDef && refDef.modelItems.length > 0;
+const isCycle = refDef ? ancestors.has(refDef.name) : false;
+const tooDeep = depth > 12;
+const canExpand = isAssembly && !isCycle && !tooDeep;
+const childAncestors = refDef
+  ? new Set([...ancestors, refDef.name])
+  : ancestors;
+const href = refDef ? `#${refDef.name}` : null;
+const open = depth < 1;
+---
+
+{
+  canExpand ? (
+    <details open={open ? true : undefined} class="outline-node">
+      <summary>
+        {href ? (
+          <a href={href}>
+            <code>&lt;{tag}&gt;</code>
+          </a>
+        ) : (
+          <code>&lt;{tag}&gt;</code>
+        )}{" "}
+        <span class="outline-card">{card}</span>
+      </summary>
+      <div class="outline-children">
+        {refDef!.modelItems.map((c) => (
+          <Self
+            item={c}
+            defMap={defMap}
+            ancestors={childAncestors}
+            depth={depth + 1}
+          />
+        ))}
+      </div>
+      <div class="outline-close">
+        <code>&lt;/{tag}&gt;</code>
+      </div>
+    </details>
+  ) : (
+    <div class="outline-leaf">
+      {href ? (
+        <a href={href}>
+          <code>&lt;{tag}/&gt;</code>
+        </a>
+      ) : (
+        <code>&lt;{tag}/&gt;</code>
+      )}{" "}
+      <span class="outline-card">{card}</span>
+    </div>
+  )
+}

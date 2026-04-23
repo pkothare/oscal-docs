@@ -1,0 +1,43 @@
+---
+import XmlOutlineNode from "./XmlOutlineNode.astro";
+import type { MetaschemaDefinition } from "../lib/metaschema";
+
+interface Props {
+  rootDef: MetaschemaDefinition;
+  defMap: Map<string, MetaschemaDefinition>;
+}
+
+const { rootDef, defMap } = Astro.props;
+const rootTag = rootDef.rootName || rootDef.name;
+---
+
+<section class="outline-section">
+  <h2>XML Format Outline</h2>
+  <p class="outline-intro">
+    Click the triangle next to any element to expand its structure. Element
+    names link to their definitions below.
+  </p>
+  <div class="outline-block">
+    <details open class="outline-node outline-root">
+      <summary>
+        <code>&lt;{rootTag}&gt;</code>{" "}
+        <span class="outline-card">[1]</span>
+      </summary>
+      <div class="outline-children">
+        {
+          rootDef.modelItems.map((c) => (
+            <XmlOutlineNode
+              item={c}
+              defMap={defMap}
+              ancestors={new Set([rootDef.name])}
+              depth={1}
+            />
+          ))
+        }
+      </div>
+      <div class="outline-close">
+        <code>&lt;/{rootTag}&gt;</code>
+      </div>
+    </details>
+  </div>
+</section>

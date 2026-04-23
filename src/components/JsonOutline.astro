@@ -1,0 +1,41 @@
+---
+import JsonOutlineNode from "./JsonOutlineNode.astro";
+import type { MetaschemaDefinition } from "../lib/metaschema";
+
+interface Props {
+  rootDef: MetaschemaDefinition;
+  defMap: Map<string, MetaschemaDefinition>;
+}
+
+const { rootDef, defMap } = Astro.props;
+---
+
+<section class="outline-section">
+  <h2>JSON Format Outline</h2>
+  <p class="outline-intro">
+    Click the triangle next to any property to expand its structure. Property
+    names link to their definitions below.
+  </p>
+  <div class="outline-block">
+    <details open class="outline-node outline-root">
+      <summary>
+        <code>{rootDef.rootName || rootDef.name}</code>{" "}
+        <span class="outline-card">[1]</span>: {"{"}
+      </summary>
+      <div class="outline-children">
+        {
+          rootDef.modelItems.map((c, i) => (
+            <JsonOutlineNode
+              item={c}
+              defMap={defMap}
+              ancestors={new Set([rootDef.name])}
+              depth={1}
+              isLast={i === rootDef.modelItems.length - 1}
+            />
+          ))
+        }
+      </div>
+      <div class="outline-close">{"}"}</div>
+    </details>
+  </div>
+</section>

@@ -1,0 +1,61 @@
+---
+import FlagsTable from "./FlagsTable.astro";
+import XmlChildElementsTable from "./XmlChildElementsTable.astro";
+import ConstraintList from "./ConstraintList.astro";
+import type { MetaschemaDefinition } from "../lib/metaschema";
+
+interface Props {
+  def: MetaschemaDefinition;
+  defMap: Map<string, MetaschemaDefinition>;
+  /** Render as the root element (uses rootName, root badge, DESCRIPTION label). */
+  asRoot?: boolean;
+}
+
+const { def, defMap, asRoot = false } = Astro.props;
+const tag = asRoot ? def.rootName || def.name : def.name;
+---
+
+<section id={def.name} class="def-section">
+  <div class="def-header">
+    <span class="def-name">&lt;{tag}&gt;</span>
+    <span class:list={["type-badge", def.type]}>
+      {def.type === "assembly" ? "element" : def.type}
+    </span>
+    {asRoot && def.isRoot && <span class="version-badge">root</span>}
+  </div>
+
+  {
+    !asRoot && def.formalName && (
+      <div style="margin-bottom: 0.25rem; color: var(--color-text-heading); font-weight: 500;">
+        {def.formalName}
+      </div>
+    )
+  }
+
+  <div class="def-description">
+    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? " " : ""}{def.description}
+  </div>
+
+  {
+    def.remarks &&
+      (asRoot ? (
+        <div class="def-remarks">
+          <strong>Remarks</strong>
+          <br />
+          {def.remarks}
+        </div>
+      ) : (
+        <div class="def-remarks">{def.remarks}</div>
+      ))
+  }
+
+  {def.flags.length > 0 && <FlagsTable flags={def.flags} prefix="@" />}
+
+  {
+    def.modelItems.length > 0 && (
+      <XmlChildElementsTable items={def.modelItems} defMap={defMap} />
+    )
+  }
+
+  {def.constraints.length > 0 && <ConstraintList constraints={def.constraints} />}
+</section>
