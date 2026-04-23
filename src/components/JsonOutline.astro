@@ -1,5 +1,6 @@
 ---
 import JsonOutlineNode from "./JsonOutlineNode.astro";
+import JsonOutlineFlag from "./JsonOutlineFlag.astro";
 import type { MetaschemaDefinition } from "../lib/metaschema";
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const { rootDef, defMap } = Astro.props;
+const flagCount = rootDef.flags.length;
+const itemCount = rootDef.modelItems.length;
 ---
 
 <section class="outline-section">
@@ -24,13 +27,21 @@ const { rootDef, defMap } = Astro.props;
       </summary>
       <div class="outline-children">
         {
+          rootDef.flags.map((f, i) => (
+            <JsonOutlineFlag
+              flag={f}
+              isLast={itemCount === 0 && i === flagCount - 1}
+            />
+          ))
+        }
+        {
           rootDef.modelItems.map((c, i) => (
             <JsonOutlineNode
               item={c}
               defMap={defMap}
               ancestors={new Set([rootDef.name])}
               depth={1}
-              isLast={i === rootDef.modelItems.length - 1}
+              isLast={i === itemCount - 1}
             />
           ))
         }

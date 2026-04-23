@@ -1,5 +1,6 @@
 ---
 import Self from "./XmlOutlineNode.astro";
+import XmlOutlineFlag from "./XmlOutlineFlag.astro";
 import type { ModelItem, MetaschemaDefinition } from "../lib/metaschema";
 
 interface Props {
@@ -26,8 +27,9 @@ function cardinality(it: ModelItem): string {
 const tag = tagName(item);
 const refDef = tag ? defMap.get(tag) : null;
 const card = cardinality(item);
-const isAssembly =
-  item.type === "assembly" && !!refDef && refDef.modelItems.length > 0;
+const hasChildren =
+  !!refDef && (refDef.modelItems.length > 0 || refDef.flags.length > 0);
+const isAssembly = item.type === "assembly" && hasChildren;
 const isCycle = refDef ? ancestors.has(refDef.name) : false;
 const tooDeep = depth > 12;
 const canExpand = isAssembly && !isCycle && !tooDeep;
@@ -52,6 +54,9 @@ const open = depth < 1;
         <span class="outline-card">{card}</span>
       </summary>
       <div class="outline-children">
+        {refDef!.flags.map((f) => (
+          <XmlOutlineFlag flag={f} />
+        ))}
         {refDef!.modelItems.map((c) => (
           <Self
             item={c}

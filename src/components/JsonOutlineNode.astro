@@ -1,5 +1,6 @@
 ---
 import Self from "./JsonOutlineNode.astro";
+import JsonOutlineFlag from "./JsonOutlineFlag.astro";
 import type { ModelItem, MetaschemaDefinition } from "../lib/metaschema";
 
 interface Props {
@@ -32,8 +33,9 @@ const tn = typeName(item);
 const refDef = tn ? defMap.get(tn) : null;
 const card = cardinality(item);
 const isArray = !!item.groupAs;
-const isAssembly =
-  item.type === "assembly" && !!refDef && refDef.modelItems.length > 0;
+const hasChildren =
+  !!refDef && (refDef.modelItems.length > 0 || refDef.flags.length > 0);
+const isAssembly = item.type === "assembly" && hasChildren;
 const isCycle = refDef ? ancestors.has(refDef.name) : false;
 const tooDeep = depth > 12;
 const canExpand = isAssembly && !isCycle && !tooDeep;
@@ -49,9 +51,12 @@ const openBrace = isArray ? "[ {" : "{";
 const closeBrace = isArray ? `} ]${tail}` : `}${tail}`;
 const collapsedRhs = isArray
   ? "[ ... ]"
-  : refDef && refDef.modelItems.length > 0
+  : refDef && (refDef.modelItems.length > 0 || refDef.flags.length > 0)
     ? "{ ... }"
     : tn;
+
+const flagCount = refDef?.flags.length ?? 0;
+const itemCount = refDef?.modelItems.length ?? 0;
 ---
 
 {
@@ -68,13 +73,16 @@ const collapsedRhs = isArray
         <span class="outline-card">{card}</span>: {openBrace}
       </summary>
       <div class="outline-children">
+        {refDef!.flags.map((f, i) => (
+          <JsonOutlineFlag flag={f} isLast={itemCount === 0 && i === flagCount - 1} />
+        ))}
         {refDef!.modelItems.map((c, i) => (
           <Self
             item={c}
             defMap={defMap}
             ancestors={childAncestors}
             depth={depth + 1}
-            isLast={i === refDef!.modelItems.length - 1}
+            isLast={i === itemCount - 1}
           />
         ))}
       </div>

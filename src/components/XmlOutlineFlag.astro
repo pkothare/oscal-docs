@@ -1,0 +1,15 @@
+---
+import type { FieldDef } from "../lib/metaschema";
+
+interface Props {
+  flag: FieldDef;
+}
+
+const { flag } = Astro.props;
+const type = flag.asType || "string";
+---
+
+<div class="outline-leaf">
+  <code>@{flag.name}</code>{" "}
+  <span class="outline-card">{flag.required ? "[1]" : "[0 or 1]"}</span>: {type}
+</div>

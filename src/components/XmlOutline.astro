@@ -1,5 +1,6 @@
 ---
 import XmlOutlineNode from "./XmlOutlineNode.astro";
+import XmlOutlineFlag from "./XmlOutlineFlag.astro";
 import type { MetaschemaDefinition } from "../lib/metaschema";
 
 interface Props {
@@ -24,6 +25,9 @@ const rootTag = rootDef.rootName || rootDef.name;
         <span class="outline-card">[1]</span>
       </summary>
       <div class="outline-children">
+        {
+          rootDef.flags.map((f) => <XmlOutlineFlag flag={f} />)
+        }
         {
           rootDef.modelItems.map((c) => (
             <XmlOutlineNode
