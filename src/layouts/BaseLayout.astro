@@ -35,6 +35,17 @@ const latest = version ? await getLatestVersion() : "";
   <body>
     <header>
       <nav class="top-nav">
+        <button
+          type="button"
+          class="hamburger"
+          aria-label="Toggle navigation menu"
+          aria-controls="site-sidebar-region"
+          aria-expanded="false"
+        >
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
         <a href={base} class="logo">
           <img src={`${base}logo.png`} alt="OSCAL Foundation" />
         </a>
@@ -52,6 +63,14 @@ const latest = version ? await getLatestVersion() : "";
                   class:list={["format-toggle-btn", format === "xml" && "active"]}
                 >XML</a>
               </div>
+              <select
+                class="version-select format-select"
+                onchange="if(this.value)window.location.href=this.value"
+                aria-label="Format"
+              >
+                <option value={`${base}${version}/${model}/json/`} selected={format === "json"}>JSON</option>
+                <option value={`${base}${version}/${model}/xml/`} selected={format === "xml"}>XML</option>
+              </select>
               <select
                 class="version-select header-version-select"
                 onchange="if(this.value)window.location.href=this.value"
@@ -86,6 +105,7 @@ const latest = version ? await getLatestVersion() : "";
         </div>
       </nav>
     </header>
+    <div class="sidebar-backdrop" hidden></div>
     <main>
       <slot />
     </main>
@@ -111,6 +131,43 @@ const latest = version ? await getLatestVersion() : "";
         window.addEventListener('hashchange', updateFragmentActive);
         document.addEventListener('DOMContentLoaded', updateFragmentActive);
         updateFragmentActive();
+
+        function setupSidebarToggle() {
+          var btn = document.querySelector('.hamburger');
+          var backdrop = document.querySelector('.sidebar-backdrop');
+          var sidebar = document.querySelector('.sidebar');
+          if (!btn) return;
+          if (!sidebar) {
+            btn.hidden = true;
+            return;
+          }
+          function close() {
+            document.body.classList.remove('sidebar-open');
+            btn.setAttribute('aria-expanded', 'false');
+            if (backdrop) backdrop.hidden = true;
+          }
+          function open() {
+            document.body.classList.add('sidebar-open');
+            btn.setAttribute('aria-expanded', 'true');
+            if (backdrop) backdrop.hidden = false;
+          }
+          btn.addEventListener('click', function () {
+            if (document.body.classList.contains('sidebar-open')) close();
+            else open();
+          });
+          if (backdrop) backdrop.addEventListener('click', close);
+          sidebar.addEventListener('click', function (e) {
+            var t = e.target;
+            while (t && t !== sidebar) {
+              if (t.tagName === 'A') { close(); return; }
+              t = t.parentNode;
+            }
+          });
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') close();
+          });
+        }
+        document.addEventListener('DOMContentLoaded', setupSidebarToggle);
       })();
     </script>
   </body>

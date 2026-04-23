@@ -1,0 +1,21 @@
+/* Centralized responsive breakpoints.
+ * Tailwind-style scale. Use min-width queries (mobile-first) where possible.
+ *
+ * Usage:
+ *   @media (--md-down) { ... }     // < 768px  (xs/sm)
+ *   @media (--md) { ... }          // >= 768px
+ *   @media (--lg) { ... }          // >= 1024px
+ *
+ * Supported by postcss-custom-media at build time.
+ */
+@custom-media --xs (min-width: 480px);
+@custom-media --sm (min-width: 640px);
+@custom-media --md (min-width: 768px);
+@custom-media --lg (min-width: 1024px);
+@custom-media --xl (min-width: 1280px);
+
+@custom-media --xs-down (max-width: 479.98px);
+@custom-media --sm-down (max-width: 639.98px);
+@custom-media --md-down (max-width: 767.98px);
+@custom-media --lg-down (max-width: 1023.98px);
+@custom-media --xl-down (max-width: 1279.98px);

@@ -37,11 +37,24 @@
   margin-top: 0.75rem;
 }
 
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-card);
+}
+
 .property-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1rem 0;
+  margin: 0;
   font-size: 0.9rem;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .property-table th {
@@ -54,12 +67,48 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
 }
 
 .property-table td {
   padding: 0.6rem 0.75rem;
   border-bottom: 1px solid var(--color-border);
   vertical-align: top;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.property-table th:first-child,
+.property-table td:first-child {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.property-table td:first-child code {
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+/* Keep all metadata columns (everything except the last "Description" column)
+ * from breaking words. The Description column still wraps normally. */
+.property-table th:not(:last-child),
+.property-table td:not(:last-child) {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.property-table td:not(:last-child) code {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.property-table th:last-child,
+.property-table td:last-child {
+  min-width: 284px;
 }
 
 .property-table tr:last-child td {
@@ -82,6 +131,18 @@
   margin: 0.25rem 0;
   font-size: 0.875rem;
   border-left: 3px solid var(--color-warning);
+  word-break: normal;
+  overflow-wrap: normal;
+  min-width: 0;
+}
+
+.constraint-list code {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .constraint-type {
