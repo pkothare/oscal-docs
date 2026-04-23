@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { OSCAL_VERSIONS, LATEST_VERSION, MODEL_FILES, MODEL_DISPLAY_NAMES } from '../../../lib/metaschema';
+
+export function getStaticPaths() {
+  return OSCAL_VERSIONS.map(version => ({ params: { version } }));
+}
+
+const { version } = Astro.params;
+const base = import.meta.env.BASE_URL;
+const models = Object.keys(MODEL_FILES);
+---
+
+<BaseLayout title={`Models - ${version}`} version={version}>
+  <div class="breadcrumb">
+    <a href={base}>Home</a>
+    <span class="sep">/</span>
+    <span>Models</span>
+    <span class="sep">/</span>
+    <span>{version}</span>
+    {version === LATEST_VERSION && <span class="version-badge latest">Latest</span>}
+  </div>
+
+  <h1>OSCAL Models <span class="version-badge" class:list={[version === LATEST_VERSION && 'latest']}>{version}</span></h1>
+  <p style="color: var(--color-text-muted); margin-bottom: 2rem;">
+    Select a model to view its JSON and XML reference documentation.
+  </p>
+
+  <h2>Other Versions</h2>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+    {OSCAL_VERSIONS.map(v => (
+      <a href={`${base}models/${v}/`}
+         class="format-tab"
+         class:list={[v === version && 'active']}>
+        {v}
+        {v === LATEST_VERSION && ' (latest)'}
+      </a>
+    ))}
+  </div>
+
+  <h2>Models</h2>
+  <div class="card-grid">
+    {models.map(slug => (
+      <a href={`${base}models/${version}/${slug}/json-reference/`} class="card">
+        <h3>{MODEL_DISPLAY_NAMES[slug]}</h3>
+        <p>View the {MODEL_DISPLAY_NAMES[slug]} model reference</p>
+      </a>
+    ))}
+  </div>
+</BaseLayout>

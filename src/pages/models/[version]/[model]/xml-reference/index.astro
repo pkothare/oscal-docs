@@ -1,0 +1,248 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import {
+  OSCAL_VERSIONS, LATEST_VERSION, MODEL_FILES, MODEL_DISPLAY_NAMES,
+  resolveModel,
+  type ResolvedModel, type ModelItem
+} from '../../../../../lib/metaschema';
+
+export function getStaticPaths() {
+  const paths: { params: { version: string; model: string } }[] = [];
+  for (const version of OSCAL_VERSIONS) {
+    for (const model of Object.keys(MODEL_FILES)) {
+      paths.push({ params: { version, model } });
+    }
+  }
+  return paths;
+}
+
+const { version, model: modelSlug } = Astro.params;
+const base = import.meta.env.BASE_URL;
+
+let resolved: ResolvedModel;
+let error: string | null = null;
+try {
+  resolved = await resolveModel(modelSlug!, version!);
+} catch (e: any) {
+  error = e.message;
+  resolved = {
+    name: modelSlug!,
+    displayName: MODEL_DISPLAY_NAMES[modelSlug!] || modelSlug!,
+    version: version!,
+    definitions: [],
+  };
+}
+
+const rootDef = resolved.rootDefinition;
+const otherDefs = resolved.definitions.filter(d => d !== rootDef);
+const defMap = new Map(resolved.definitions.map(d => [d.name, d]));
+
+function getCardinality(item: ModelItem): string {
+  const min = item.minOccurs ?? 0;
+  const max = item.maxOccurs;
+  if (max === 'unbounded') return `[${min} to ∞]`;
+  if (max !== undefined) return `[${min} to ${max}]`;
+  if (min === 1) return '[1]';
+  return '[0 or 1]';
+}
+---
+
+<BaseLayout title={`${resolved.displayName} - XML Reference - ${version}`} version={version} model={modelSlug}>
+  <div class="breadcrumb">
+    <a href={base}>Home</a>
+    <span class="sep">/</span>
+    <a href={`${base}models/${version}/`}>Models ({version})</a>
+    <span class="sep">/</span>
+    <a href={`${base}models/${version}/${modelSlug}/json-reference/`}>{resolved.displayName}</a>
+    <span class="sep">/</span>
+    <span>XML Reference</span>
+  </div>
+
+  <div class="sidebar-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Version</div>
+        {OSCAL_VERSIONS.map(v => (
+          <a href={`${base}models/${v}/${modelSlug}/xml-reference/`}
+             class:list={['sidebar-link', v === version && 'active']}>
+            {v} {v === LATEST_VERSION ? '(latest)' : ''}
+          </a>
+        ))}
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Models</div>
+        {Object.entries(MODEL_DISPLAY_NAMES).map(([slug, name]) => (
+          <a href={`${base}models/${version}/${slug}/xml-reference/`}
+             class:list={['sidebar-link', slug === modelSlug && 'active']}>
+            {name}
+          </a>
+        ))}
+      </div>
+
+      {rootDef && (
+        <div class="sidebar-section">
+          <div class="sidebar-title">Elements</div>
+          <a href={`#${rootDef.name}`} class="sidebar-link">{rootDef.formalName}</a>
+          {rootDef.modelItems.map(item => (
+            <a href={`#${item.ref || item.name}`} class="sidebar-link" style="padding-left: 1rem;">
+              {item.ref || item.name}
+            </a>
+          ))}
+        </div>
+      )}
+    </aside>
+
+    <div class="content">
+      <h1>{resolved.displayName} Model {version} XML Format Reference</h1>
+
+      {error && (
+        <div class="def-remarks" style="border-left-color: #e74c3c; margin-bottom: 1rem;">
+          Error loading metaschema: {error}
+        </div>
+      )}
+
+      <div class="format-tabs">
+        <a href={`${base}models/${version}/${modelSlug}/json-reference/`} class="format-tab">JSON Reference</a>
+        <span class="format-tab active">XML Reference</span>
+      </div>
+
+      {rootDef && (
+        <section id={rootDef.name} class="def-section">
+          <div class="def-header">
+            <span class="def-name">&lt;{rootDef.rootName || rootDef.name}&gt;</span>
+            <span class="type-badge assembly">element</span>
+            {rootDef.isRoot && <span class="version-badge">root</span>}
+          </div>
+          <div class="def-description">
+            <strong>DESCRIPTION</strong> {rootDef.description}
+          </div>
+          {rootDef.remarks && (
+            <div class="def-remarks">
+              <strong>Remarks</strong><br />{rootDef.remarks}
+            </div>
+          )}
+
+          {rootDef.flags.length > 0 && (
+            <div>
+              <h3>Attributes</h3>
+              <table class="property-table">
+                <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                <tbody>
+                  {rootDef.flags.map(flag => (
+                    <tr>
+                      <td><code>@{flag.name}</code></td>
+                      <td><span class="type-badge flag">{flag.asType || 'string'}</span></td>
+                      <td>{flag.required ? 'Yes' : 'No'}</td>
+                      <td>{flag.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {rootDef.modelItems.length > 0 && (
+            <div>
+              <h3>Child Elements ({rootDef.modelItems.length})</h3>
+              <table class="property-table">
+                <thead><tr><th>Element</th><th>Type</th><th>Cardinality</th><th>Description</th></tr></thead>
+                <tbody>
+                  {rootDef.modelItems.map(item => {
+                    const refDef = item.ref ? defMap.get(item.ref) : null;
+                    return (
+                      <tr>
+                        <td><a href={`#${item.ref || item.name}`}><code>&lt;{item.ref || item.name}&gt;</code></a></td>
+                        <td><span class:list={['type-badge', item.type]}>{item.type}</span></td>
+                        <td><span class="cardinality">{getCardinality(item)}</span></td>
+                        <td>{refDef?.description || item.description || ''}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      <h2>Element Definitions ({otherDefs.length})</h2>
+      {otherDefs.map(def => (
+        <section id={def.name} class="def-section">
+          <div class="def-header">
+            <span class="def-name">&lt;{def.name}&gt;</span>
+            <span class:list={['type-badge', def.type]}>{def.type === 'assembly' ? 'element' : def.type}</span>
+          </div>
+          <div style="margin-bottom: 0.25rem; color: var(--color-text-heading); font-weight: 500;">
+            {def.formalName}
+          </div>
+          <div class="def-description">{def.description}</div>
+          {def.remarks && <div class="def-remarks">{def.remarks}</div>}
+
+          {def.flags.length > 0 && (
+            <div>
+              <h3>Attributes</h3>
+              <table class="property-table">
+                <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                <tbody>
+                  {def.flags.map(flag => (
+                    <tr>
+                      <td><code>@{flag.name}</code></td>
+                      <td><span class="type-badge flag">{flag.asType || 'string'}</span></td>
+                      <td>{flag.required ? 'Yes' : 'No'}</td>
+                      <td>{flag.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {def.modelItems.length > 0 && (
+            <div>
+              <h3>Child Elements ({def.modelItems.length})</h3>
+              <table class="property-table">
+                <thead><tr><th>Element</th><th>Type</th><th>Cardinality</th><th>Description</th></tr></thead>
+                <tbody>
+                  {def.modelItems.map(item => {
+                    const refDef = item.ref ? defMap.get(item.ref) : null;
+                    return (
+                      <tr>
+                        <td><a href={`#${item.ref || item.name}`}><code>&lt;{item.ref || item.name}&gt;</code></a></td>
+                        <td><span class:list={['type-badge', item.type]}>{item.type}</span></td>
+                        <td><span class="cardinality">{getCardinality(item)}</span></td>
+                        <td>{refDef?.description || item.description || ''}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {def.constraints.length > 0 && (
+            <div>
+              <h3>Constraints ({def.constraints.length})</h3>
+              <ul class="constraint-list">
+                {def.constraints.map(c => (
+                  <li>
+                    <span class="constraint-type">{c.type}</span>
+                    {c.target && <span> for <code>{c.target}</code></span>}
+                    {c.description && <span> — {c.description}</span>}
+                    {c.values && c.values.length > 0 && (
+                      <ul class="enum-list">
+                        {c.values.map(v => (
+                          <li><span class="enum-value">{v.value}</span>: {v.description}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
