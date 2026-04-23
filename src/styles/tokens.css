@@ -1,0 +1,35 @@
+/* OSCAL Foundation brand palette and design tokens */
+:root {
+  --brand-primary: #4e79d8;
+  --brand-secondary: #223152;
+  --brand-text: #121212;
+  --brand-accent: #d2dcf3;
+
+  --brand-primary-dark: #3a5fb5;
+  --brand-primary-light: #7a96e3;
+  --brand-accent-soft: #eaf0fb;
+  --brand-secondary-soft: #3a4a73;
+
+  --color-bg-dark: #ffffff;
+  --color-bg-darker: var(--brand-secondary);
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: var(--brand-accent-soft);
+  --color-accent: var(--brand-primary);
+  --color-accent-light: var(--brand-primary-light);
+  --color-accent-dim: var(--brand-primary-dark);
+  --color-text: var(--brand-text);
+  --color-text-muted: #4a5568;
+  --color-text-heading: var(--brand-secondary);
+  --color-border: var(--brand-accent);
+  --color-success: #2f7d4a;
+  --color-warning: #b65d12;
+  --color-type-assembly: var(--brand-primary);
+  --color-type-field: var(--brand-secondary);
+  --color-type-flag: var(--brand-primary-light);
+  --color-code-bg: var(--brand-accent-soft);
+  --header-height: 60px;
+  --footer-height: 72px;
+
+  --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}

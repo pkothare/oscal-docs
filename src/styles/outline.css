@@ -1,0 +1,95 @@
+/* Collapsible JSON / XML format outline */
+.outline-section {
+  margin-bottom: 2rem;
+}
+
+.outline-intro {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.outline-block {
+  background: var(--color-bg-card, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, "Roboto Mono", monospace);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.outline-block code {
+  background: var(--brand-accent-soft, transparent);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: inherit;
+  color: var(--brand-primary-dark, var(--brand-primary));
+}
+
+.outline-block a {
+  color: var(--brand-primary-dark, var(--brand-primary));
+  text-decoration: none;
+}
+
+.outline-block a code {
+  transition: background 0.1s ease;
+}
+
+.outline-block a:hover code {
+  background: var(--brand-accent, var(--brand-accent-soft));
+  text-decoration: none;
+}
+
+.outline-card {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.outline-node > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+.outline-node > summary::-webkit-details-marker {
+  display: none;
+}
+
+.outline-node > summary::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  transition: transform 0.1s ease;
+  transform-origin: 40% 55%;
+}
+
+.outline-node[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.outline-children {
+  padding-left: 1.5rem;
+  border-left: 1px dotted var(--color-border);
+  margin-left: 0.35rem;
+}
+
+.outline-node,
+.outline-leaf {
+  margin: 0.25rem 0;
+}
+
+.outline-close {
+  padding-left: 1.1rem;
+  margin-top: 0.25rem;
+}
+
+.outline-leaf {
+  padding-left: 1.1rem;
+}

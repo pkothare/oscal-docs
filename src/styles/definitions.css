@@ -1,0 +1,139 @@
+/* Definition section, property table, constraints, format tabs */
+.def-section {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.def-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.def-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  font-family: var(--font-mono);
+}
+
+.def-description {
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.def-remarks {
+  color: var(--color-text);
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  background: var(--brand-accent-soft);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-accent);
+  margin-top: 0.75rem;
+}
+
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.property-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  background: var(--brand-accent-soft);
+  color: var(--color-text-heading);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.property-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.property-table tr:last-child td {
+  border-bottom: none;
+}
+
+.property-table tr:hover td {
+  background: var(--brand-accent-soft);
+}
+
+.constraint-list {
+  list-style: none;
+  margin: 0.5rem 0;
+}
+
+.constraint-list > li {
+  padding: 0.5rem 0.75rem;
+  background: var(--brand-accent-soft);
+  border-radius: 4px;
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  border-left: 3px solid var(--color-warning);
+}
+
+.constraint-type {
+  font-weight: 600;
+  color: var(--color-warning);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  margin-right: 0.5rem;
+}
+
+.enum-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+}
+
+.enum-list li {
+  padding: 0.35rem 0;
+  font-size: 0.875rem;
+}
+
+.enum-value {
+  font-family: var(--font-mono);
+  color: var(--color-accent-dim);
+  font-weight: 500;
+}
+
+.cardinality {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.format-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.format-tab {
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.format-tab.active {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent);
+  color: white;
+}

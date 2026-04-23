@@ -1,0 +1,141 @@
+/* Page chrome: header, footer, main, logo, format toggle */
+header {
+  background: var(--brand-accent-soft);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--brand-accent);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header a {
+  color: var(--color-text-heading);
+}
+header a:hover {
+  color: var(--brand-primary);
+}
+
+.top-nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.format-toggle {
+  display: inline-flex;
+  border: 1px solid var(--brand-accent);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.format-toggle-btn {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.format-toggle-btn + .format-toggle-btn {
+  border-left: 1px solid var(--brand-accent);
+}
+
+.format-toggle-btn:hover {
+  background: var(--brand-accent-soft);
+  color: var(--brand-primary);
+}
+
+.format-toggle-btn.active {
+  background: var(--brand-primary);
+  color: #ffffff;
+}
+
+.header-version-select {
+  width: auto;
+  min-width: 8rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo img {
+  display: block;
+  height: 32px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.logo:hover img {
+  opacity: 0.85;
+}
+
+.nav-subtitle {
+  color: var(--brand-secondary);
+  font-size: 0.875rem;
+}
+
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  flex: 1;
+  width: 100%;
+}
+
+footer {
+  background: var(--brand-accent-soft);
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--brand-accent);
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+footer a {
+  color: var(--brand-primary);
+}
+footer a:hover {
+  color: var(--brand-primary-dark);
+}
+
+.version-select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border, #1a3050);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.version-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}

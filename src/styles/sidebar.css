@@ -1,0 +1,71 @@
+/* Sidebar grid layout, links, and active states */
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+}
+
+.sidebar-layout > .content {
+  grid-column: 2;
+}
+
+.sidebar {
+  position: fixed;
+  top: var(--header-height, 60px);
+  bottom: var(--footer-height, 60px);
+  width: 260px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.sidebar-section {
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  margin: 0.1rem 0;
+}
+
+.sidebar-link:hover {
+  background: var(--color-bg-card);
+  color: var(--color-accent);
+}
+
+.sidebar-link.active,
+.sidebar-link.fragment-active {
+  background: var(--brand-accent);
+  color: var(--brand-secondary);
+}
+
+.sidebar-link.active:hover,
+.sidebar-link.fragment-active:hover {
+  background: var(--brand-accent);
+  color: var(--brand-secondary);
+}
+
+@media (max-width: 768px) {
+  .sidebar-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    max-height: none;
+  }
+}

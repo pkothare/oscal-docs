@@ -1,5 +1,6 @@
 ---
 import { getOscalVersions, getLatestVersion } from "../lib/metaschema";
+import "../styles/global.css";
 
 export interface Props {
   title: string;
@@ -35,7 +36,7 @@ const latest = version ? await getLatestVersion() : "";
     <header>
       <nav class="top-nav">
         <a href={base} class="logo">
-          <img src={`${base}oscal-logo.png`} alt="OSCAL Foundation" />
+          <img src={`${base}logo.png`} alt="OSCAL Foundation" />
         </a>
         <span class="nav-subtitle">Model Reference Documentation</span>
         {version && model && format && (

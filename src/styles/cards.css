@@ -1,0 +1,104 @@
+/* Cards (model index), version + type badges */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.2s;
+  display: block;
+}
+
+.card:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-accent-dim);
+  transform: translateY(-1px);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.card p {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.version-badge {
+  display: inline-block;
+  background: var(--color-accent-dim);
+  color: white;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.version-badge.latest {
+  background: var(--color-success);
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.type-badge.assembly {
+  background: var(--brand-accent-soft);
+  color: var(--color-type-assembly);
+  border: 1px solid var(--brand-accent);
+}
+
+.type-badge.field {
+  background: var(--brand-accent-soft);
+  color: var(--color-type-field);
+  border: 1px solid var(--brand-accent);
+}
+
+.type-badge.flag {
+  background: var(--brand-accent-soft);
+  color: var(--color-type-flag);
+  border: 1px solid var(--brand-accent);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--color-text-muted);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-accent);
+}
+
+.breadcrumb .sep {
+  color: var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
