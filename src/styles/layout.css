@@ -74,6 +74,20 @@ header a:hover {
   min-width: 8rem;
 }
 
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-primary);
+  padding: 0.25rem;
+  border-radius: 4px;
+  line-height: 0;
+}
+
+.github-link svg {
+  display: block;
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
