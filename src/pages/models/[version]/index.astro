@@ -1,14 +1,17 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { OSCAL_VERSIONS, LATEST_VERSION, MODEL_FILES, MODEL_DISPLAY_NAMES } from '../../../lib/metaschema';
+import { getOscalVersions, getLatestVersion, MODEL_FILES, MODEL_DISPLAY_NAMES } from '../../../lib/metaschema';
 
-export function getStaticPaths() {
-  return OSCAL_VERSIONS.map(version => ({ params: { version } }));
+export async function getStaticPaths() {
+  const versions = await getOscalVersions();
+  return versions.map(version => ({ params: { version } }));
 }
 
 const { version } = Astro.params;
 const base = import.meta.env.BASE_URL;
 const models = Object.keys(MODEL_FILES);
+const OSCAL_VERSIONS = await getOscalVersions();
+const LATEST_VERSION = await getLatestVersion();
 ---
 
 <BaseLayout title={`Models - ${version}`} version={version}>

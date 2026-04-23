@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { OSCAL_VERSIONS, LATEST_VERSION } from '../lib/metaschema';
+import { getOscalVersions, getLatestVersion } from '../lib/metaschema';
 
 const base = import.meta.env.BASE_URL;
+const OSCAL_VERSIONS = await getOscalVersions();
+const LATEST_VERSION = await getLatestVersion();
 ---
 
 <BaseLayout title="OSCAL Model Reference">

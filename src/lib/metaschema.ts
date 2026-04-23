@@ -1,10 +1,60 @@
 import { XMLParser } from 'fast-xml-parser';
 
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/usnistgov/OSCAL';
+const GITHUB_API_BASE = 'https://api.github.com/repos/usnistgov/OSCAL';
 
-// OSCAL versions to support
-export const OSCAL_VERSIONS = ['v1.1.2', 'v1.1.3', 'v1.2.0', 'v1.2.1'];
-export const LATEST_VERSION = OSCAL_VERSIONS[OSCAL_VERSIONS.length - 1];
+// Minimum OSCAL version to include (older releases predate the metaschema files we render).
+const MIN_VERSION: [number, number, number] = [1, 1, 2];
+
+function compareSemver(a: [number, number, number], b: [number, number, number]): number {
+  for (let i = 0; i < 3; i++) {
+    if (a[i] !== b[i]) return a[i] - b[i];
+  }
+  return 0;
+}
+
+function parseSemverTag(tag: string): [number, number, number] | null {
+  const m = /^v(\d+)\.(\d+)\.(\d+)$/.exec(tag);
+  if (!m) return null;
+  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+}
+
+let versionsPromise: Promise<string[]> | null = null;
+
+// Dynamically fetch OSCAL release tags from GitHub at build time.
+export function getOscalVersions(): Promise<string[]> {
+  if (versionsPromise) return versionsPromise;
+  versionsPromise = (async () => {
+    const headers: Record<string, string> = { 'Accept': 'application/vnd.github+json' };
+    if (process.env.GITHUB_TOKEN) headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+
+    const tags: { name: string }[] = [];
+    // Paginate; OSCAL has < 100 tags but be safe.
+    for (let page = 1; page <= 5; page++) {
+      const res = await fetch(`${GITHUB_API_BASE}/tags?per_page=100&page=${page}`, { headers });
+      if (!res.ok) throw new Error(`Failed to fetch OSCAL tags: ${res.status} ${res.statusText}`);
+      const batch = await res.json() as { name: string }[];
+      tags.push(...batch);
+      if (batch.length < 100) break;
+    }
+
+    const versions = tags
+      .map(t => ({ tag: t.name, parsed: parseSemverTag(t.name) }))
+      .filter((x): x is { tag: string; parsed: [number, number, number] } =>
+        x.parsed !== null && compareSemver(x.parsed, MIN_VERSION) >= 0)
+      .sort((a, b) => compareSemver(a.parsed, b.parsed))
+      .map(x => x.tag);
+
+    if (versions.length === 0) throw new Error('No OSCAL release tags found');
+    return versions;
+  })();
+  return versionsPromise;
+}
+
+export async function getLatestVersion(): Promise<string> {
+  const versions = await getOscalVersions();
+  return versions[versions.length - 1];
+}
 
 // Top-level model metaschema files (these are the root models, not shared modules)
 export const MODEL_FILES: Record<string, string> = {
