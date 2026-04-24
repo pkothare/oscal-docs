@@ -1,11 +1,11 @@
 ---
-import { MODEL_DISPLAY_NAMES, type MetaschemaDefinition } from "../lib/metaschema";
+import { MODEL_DISPLAY_NAMES, type MetaschemaDefinition } from '../lib/metaschema';
 
 interface Props {
   base: string;
   version: string;
   modelSlug: string;
-  format: "json" | "xml";
+  format: 'json' | 'xml';
   definitions: MetaschemaDefinition[];
 }
 
@@ -19,7 +19,7 @@ const { base, version, modelSlug, format, definitions } = Astro.props;
       Object.entries(MODEL_DISPLAY_NAMES).map(([slug, name]) => (
         <a
           href={`${base}${version}/${slug}/${format}/`}
-          class:list={["sidebar-link", slug === modelSlug && "active"]}
+          class:list={['sidebar-link', slug === modelSlug && 'active']}
         >
           {name}
         </a>

@@ -1,5 +1,5 @@
 ---
-import type { ConstraintDef } from "../lib/metaschema";
+import type { ConstraintDef } from '../lib/metaschema';
 
 interface Props {
   constraints: ConstraintDef[];
@@ -17,7 +17,7 @@ const { constraints } = Astro.props;
           <span class="constraint-type">{c.type}</span>
           {c.target && (
             <span>
-              {" "}
+              {' '}
               for <code>{c.target}</code>
             </span>
           )}

@@ -1,7 +1,7 @@
 ---
-import JsonOutlineNode from "./JsonOutlineNode.astro";
-import JsonOutlineFlag from "./JsonOutlineFlag.astro";
-import type { MetaschemaDefinition } from "../lib/metaschema";
+import JsonOutlineNode from './JsonOutlineNode.astro';
+import JsonOutlineFlag from './JsonOutlineFlag.astro';
+import type { MetaschemaDefinition } from '../lib/metaschema';
 
 interface Props {
   rootDef: MetaschemaDefinition;
@@ -16,22 +16,19 @@ const itemCount = rootDef.modelItems.length;
 <section class="outline-section">
   <h2>JSON Format Outline</h2>
   <p class="outline-intro">
-    Click the triangle next to any property to expand its structure. Property
-    names link to their definitions below.
+    Click the triangle next to any property to expand its structure. Property names link to their
+    definitions below.
   </p>
   <div class="outline-block">
     <details open class="outline-node outline-root">
       <summary>
-        <code>{rootDef.rootName || rootDef.name}</code>{" "}
-        <span class="outline-card">[1]</span>: {"{"}
+        <code>{rootDef.rootName || rootDef.name}</code>{' '}
+        <span class="outline-card">[1]</span>: {'{'}
       </summary>
       <div class="outline-children">
         {
           rootDef.flags.map((f, i) => (
-            <JsonOutlineFlag
-              flag={f}
-              isLast={itemCount === 0 && i === flagCount - 1}
-            />
+            <JsonOutlineFlag flag={f} isLast={itemCount === 0 && i === flagCount - 1} />
           ))
         }
         {
@@ -46,7 +43,7 @@ const itemCount = rootDef.modelItems.length;
           ))
         }
       </div>
-      <div class="outline-close">{"}"}</div>
+      <div class="outline-close">{'}'}</div>
     </details>
   </div>
 </section>

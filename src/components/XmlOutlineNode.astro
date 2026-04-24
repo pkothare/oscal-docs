@@ -1,7 +1,7 @@
 ---
-import Self from "./XmlOutlineNode.astro";
-import XmlOutlineFlag from "./XmlOutlineFlag.astro";
-import type { ModelItem, MetaschemaDefinition } from "../lib/metaschema";
+import Self from './XmlOutlineNode.astro';
+import XmlOutlineFlag from './XmlOutlineFlag.astro';
+import type { ModelItem, MetaschemaDefinition } from '../lib/metaschema';
 
 interface Props {
   item: ModelItem;
@@ -13,29 +13,26 @@ interface Props {
 const { item, defMap, ancestors, depth } = Astro.props;
 
 function tagName(it: ModelItem): string {
-  return it.ref || it.name || "";
+  return it.ref || it.name || '';
 }
 function cardinality(it: ModelItem): string {
   const min = it.minOccurs ?? 0;
   const max = it.maxOccurs;
-  if (max === "unbounded") return `[${min} to ∞]`;
+  if (max === 'unbounded') return `[${min} to ∞]`;
   if (max !== undefined) return `[${min} to ${max}]`;
-  if (min === 1) return "[1]";
-  return "[0 or 1]";
+  if (min === 1) return '[1]';
+  return '[0 or 1]';
 }
 
 const tag = tagName(item);
 const refDef = tag ? defMap.get(tag) : null;
 const card = cardinality(item);
-const hasChildren =
-  !!refDef && (refDef.modelItems.length > 0 || refDef.flags.length > 0);
-const isAssembly = item.type === "assembly" && hasChildren;
+const hasChildren = !!refDef && (refDef.modelItems.length > 0 || refDef.flags.length > 0);
+const isAssembly = item.type === 'assembly' && hasChildren;
 const isCycle = refDef ? ancestors.has(refDef.name) : false;
 const tooDeep = depth > 12;
 const canExpand = isAssembly && !isCycle && !tooDeep;
-const childAncestors = refDef
-  ? new Set([...ancestors, refDef.name])
-  : ancestors;
+const childAncestors = refDef ? new Set([...ancestors, refDef.name]) : ancestors;
 const href = refDef ? `#${refDef.name}` : null;
 const open = depth < 1;
 ---
@@ -50,7 +47,7 @@ const open = depth < 1;
           </a>
         ) : (
           <code>&lt;{tag}&gt;</code>
-        )}{" "}
+        )}{' '}
         <span class="outline-card">{card}</span>
       </summary>
       <div class="outline-children">
@@ -58,12 +55,7 @@ const open = depth < 1;
           <XmlOutlineFlag flag={f} />
         ))}
         {refDef!.modelItems.map((c) => (
-          <Self
-            item={c}
-            defMap={defMap}
-            ancestors={childAncestors}
-            depth={depth + 1}
-          />
+          <Self item={c} defMap={defMap} ancestors={childAncestors} depth={depth + 1} />
         ))}
       </div>
       <div class="outline-close">
@@ -78,7 +70,7 @@ const open = depth < 1;
         </a>
       ) : (
         <code>&lt;{tag}/&gt;</code>
-      )}{" "}
+      )}{' '}
       <span class="outline-card">{card}</span>
     </div>
   )

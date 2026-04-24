@@ -1,8 +1,8 @@
 ---
-import BaseLayout from "../../../../layouts/BaseLayout.astro";
-import ModelSidebar from "../../../../components/ModelSidebar.astro";
-import JsonOutline from "../../../../components/JsonOutline.astro";
-import JsonDefinitionSection from "../../../../components/JsonDefinitionSection.astro";
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ModelSidebar from '../../../../components/ModelSidebar.astro';
+import JsonOutline from '../../../../components/JsonOutline.astro';
+import JsonDefinitionSection from '../../../../components/JsonDefinitionSection.astro';
 import {
   getOscalVersions,
   MODEL_FILES,
@@ -10,7 +10,7 @@ import {
   resolveModel,
   type ResolvedModel,
   type ModelItem,
-} from "../../../../lib/metaschema";
+} from '../../../../lib/metaschema';
 
 export async function getStaticPaths() {
   const versions = await getOscalVersions();
@@ -46,10 +46,10 @@ const defMap = new Map(resolved.definitions.map((d) => [d.name, d]));
 
 // JSON serialization name of a model item (group-as for arrays/maps, otherwise ref/name).
 function jsonName(item: ModelItem): string {
-  return item.groupAs || item.ref || item.name || "";
+  return item.groupAs || item.ref || item.name || '';
 }
 function typeName(item: ModelItem): string {
-  return item.ref || item.name || "";
+  return item.ref || item.name || '';
 }
 
 // Collect alternate JSON names that point at each def, so we can emit anchor aliases.

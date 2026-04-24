@@ -29,23 +29,23 @@ let versionsPromise: Promise<string[]> | null = null;
 export function getOscalVersions(): Promise<string[]> {
   if (versionsPromise) return versionsPromise;
   versionsPromise = (async () => {
-    const headers: Record<string, string> = { 'Accept': 'application/vnd.github+json' };
+    const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
     if (process.env.GITHUB_TOKEN) headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
 
     const tags: { name: string }[] = [];
     for (let page = 1; page <= 10; page++) {
       const res = await fetch(`${GITHUB_API_BASE}/tags?per_page=100&page=${page}`, { headers });
       if (!res.ok) throw new Error(`Failed to fetch OSCAL tags: ${res.status} ${res.statusText}`);
-      const batch = await res.json() as { name: string }[];
+      const batch = (await res.json()) as { name: string }[];
       tags.push(...batch);
       if (batch.length < 100) break;
     }
 
     const versions = tags
-      .map(t => ({ tag: t.name, parsed: parseSemverTag(t.name) }))
+      .map((t) => ({ tag: t.name, parsed: parseSemverTag(t.name) }))
       .filter((x): x is { tag: string; parsed: ParsedVersion } => x.parsed !== null)
       .sort((a, b) => compareSemver(a.parsed, b.parsed))
-      .map(x => x.tag);
+      .map((x) => x.tag);
 
     if (versions.length === 0) throw new Error('No OSCAL release tags found');
     return versions;
@@ -60,8 +60,8 @@ export async function getLatestVersion(): Promise<string> {
 
 // Top-level model metaschema files (these are the root models, not shared modules)
 export const MODEL_FILES: Record<string, string> = {
-  'catalog': 'oscal_catalog_metaschema.xml',
-  'profile': 'oscal_profile_metaschema.xml',
+  catalog: 'oscal_catalog_metaschema.xml',
+  profile: 'oscal_profile_metaschema.xml',
   'component-definition': 'oscal_component_metaschema.xml',
   'system-security-plan': 'oscal_ssp_metaschema.xml',
   'assessment-plan': 'oscal_assessment-plan_metaschema.xml',
@@ -70,8 +70,8 @@ export const MODEL_FILES: Record<string, string> = {
 };
 
 export const MODEL_DISPLAY_NAMES: Record<string, string> = {
-  'catalog': 'Catalog',
-  'profile': 'Profile',
+  catalog: 'Catalog',
+  profile: 'Profile',
   'component-definition': 'Component Definition',
   'system-security-plan': 'System Security Plan',
   'assessment-plan': 'Assessment Plan',
@@ -83,11 +83,33 @@ const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
   textNodeName: '#text',
-  isArray: (name) => ['import', 'define-assembly', 'define-field', 'define-flag',
-    'assembly', 'field', 'flag', 'enum', 'allowed-values', 'index', 'index-has-key',
-    'expect', 'matches', 'is-unique', 'has-cardinality', 'key-field',
-    'prop', 'remarks', 'constraint', 'model', 'choice', 'group-as',
-    'formal-name', 'description'].includes(name),
+  isArray: (name) =>
+    [
+      'import',
+      'define-assembly',
+      'define-field',
+      'define-flag',
+      'assembly',
+      'field',
+      'flag',
+      'enum',
+      'allowed-values',
+      'index',
+      'index-has-key',
+      'expect',
+      'matches',
+      'is-unique',
+      'has-cardinality',
+      'key-field',
+      'prop',
+      'remarks',
+      'constraint',
+      'model',
+      'choice',
+      'group-as',
+      'formal-name',
+      'description',
+    ].includes(name),
 });
 
 export interface MetaschemaDefinition {
@@ -114,7 +136,7 @@ export interface FieldDef {
 
 export interface ModelItem {
   ref?: string;
-  name?: string;  // for inline definitions
+  name?: string; // for inline definitions
   formalName?: string;
   description?: string;
   type: 'assembly' | 'field' | 'flag';
@@ -207,10 +229,19 @@ function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): Mo
           ref: entry['@_ref'],
           type: key as 'assembly' | 'field',
           minOccurs: entry['@_min-occurs'] ? parseInt(entry['@_min-occurs']) : undefined,
-          maxOccurs: entry['@_max-occurs'] === 'unbounded' ? 'unbounded' : entry['@_max-occurs'] ? parseInt(entry['@_max-occurs']) : undefined,
+          maxOccurs:
+            entry['@_max-occurs'] === 'unbounded'
+              ? 'unbounded'
+              : entry['@_max-occurs']
+                ? parseInt(entry['@_max-occurs'])
+                : undefined,
           groupAs: groupAs ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_name'] : undefined,
-          inJson: groupAs ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_in-json'] : undefined,
-          remarks: entry['remarks'] ? extractText(entry['remarks'][0] || entry['remarks']) : undefined,
+          inJson: groupAs
+            ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_in-json']
+            : undefined,
+          remarks: entry['remarks']
+            ? extractText(entry['remarks'][0] || entry['remarks'])
+            : undefined,
         });
       }
     }
@@ -233,7 +264,9 @@ function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): Mo
             name,
             formalName: extractText(entry['formal-name']?.[0] || entry['formal-name']),
             description: extractText(entry['description']?.[0] || entry['description']),
-            remarks: entry['remarks'] ? extractText(entry['remarks'][0] || entry['remarks']) : undefined,
+            remarks: entry['remarks']
+              ? extractText(entry['remarks'][0] || entry['remarks'])
+              : undefined,
             flags: parseFlags(entry),
             modelItems: itemType === 'assembly' ? parseModelItems(entry['model'], collected) : [],
             constraints: parseConstraints(entry['constraint']),
@@ -245,9 +278,16 @@ function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): Mo
           ref: name,
           type: itemType,
           minOccurs: entry['@_min-occurs'] ? parseInt(entry['@_min-occurs']) : undefined,
-          maxOccurs: entry['@_max-occurs'] === 'unbounded' ? 'unbounded' : entry['@_max-occurs'] ? parseInt(entry['@_max-occurs']) : undefined,
+          maxOccurs:
+            entry['@_max-occurs'] === 'unbounded'
+              ? 'unbounded'
+              : entry['@_max-occurs']
+                ? parseInt(entry['@_max-occurs'])
+                : undefined,
           groupAs: groupAs ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_name'] : undefined,
-          inJson: groupAs ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_in-json'] : undefined,
+          inJson: groupAs
+            ? (Array.isArray(groupAs) ? groupAs[0] : groupAs)['@_in-json']
+            : undefined,
         });
       }
     }
@@ -429,7 +469,10 @@ async function resolveExternalEntities(xml: string, baseUrl: string): Promise<st
   return out;
 }
 
-export async function fetchMetaschema(version: string, filename: string): Promise<ParsedMetaschema> {
+export async function fetchMetaschema(
+  version: string,
+  filename: string,
+): Promise<ParsedMetaschema> {
   // Map version tags to branch/tag names in git
   const branch = version === 'develop' ? 'develop' : version;
   const key = `${branch}/${filename}`;
@@ -459,7 +502,7 @@ export interface ResolvedModel {
 async function fetchAllImports(
   version: string,
   filename: string,
-  visited: Set<string>
+  visited: Set<string>,
 ): Promise<MetaschemaDefinition[]> {
   if (visited.has(filename)) return [];
   visited.add(filename);
@@ -491,7 +534,7 @@ export async function resolveModel(modelSlug: string, version: string): Promise<
   }
 
   const allDefs = Array.from(deduped.values());
-  const rootDef = allDefs.find(d => d.isRoot);
+  const rootDef = allDefs.find((d) => d.isRoot);
 
   return {
     name: modelSlug,

@@ -144,7 +144,9 @@ header a:hover {
   margin: 0 auto;
   background: currentColor;
   border-radius: 2px;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
 }
 
 body.sidebar-open .hamburger-bar:nth-child(1) {

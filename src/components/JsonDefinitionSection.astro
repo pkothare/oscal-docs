@@ -1,8 +1,8 @@
 ---
-import FlagsTable from "./FlagsTable.astro";
-import JsonPropertiesTable from "./JsonPropertiesTable.astro";
-import ConstraintList from "./ConstraintList.astro";
-import type { MetaschemaDefinition } from "../lib/metaschema";
+import FlagsTable from './FlagsTable.astro';
+import JsonPropertiesTable from './JsonPropertiesTable.astro';
+import ConstraintList from './ConstraintList.astro';
+import type { MetaschemaDefinition } from '../lib/metaschema';
 
 interface Props {
   def: MetaschemaDefinition;
@@ -22,8 +22,8 @@ const displayName = asRoot ? def.rootName || def.name : def.name;
 
   <div class="def-header">
     <span class="def-name">{displayName}</span>
-    <span class:list={["type-badge", def.type]}>
-      {asRoot ? "assembly" : def.type}
+    <span class:list={['type-badge', def.type]}>
+      {asRoot ? 'assembly' : def.type}
     </span>
     {asRoot && def.isRoot && <span class="version-badge">root</span>}
   </div>
@@ -37,7 +37,7 @@ const displayName = asRoot ? def.rootName || def.name : def.name;
   }
 
   <div class="def-description">
-    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? " " : ""}{def.description}
+    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? ' ' : ''}{def.description}
   </div>
 
   {
@@ -55,11 +55,7 @@ const displayName = asRoot ? def.rootName || def.name : def.name;
 
   {def.flags.length > 0 && <FlagsTable flags={def.flags} />}
 
-  {
-    def.modelItems.length > 0 && (
-      <JsonPropertiesTable items={def.modelItems} defMap={defMap} />
-    )
-  }
+  {def.modelItems.length > 0 && <JsonPropertiesTable items={def.modelItems} defMap={defMap} />}
 
   {def.constraints.length > 0 && <ConstraintList constraints={def.constraints} />}
 </section>

@@ -5,6 +5,7 @@ const base = import.meta.env.BASE_URL;
 const latest = await getLatestVersion();
 const target = `${base}${latest}/catalog/json/`;
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -16,6 +17,6 @@ const target = `${base}${latest}/catalog/json/`;
   </head>
   <body>
     <p>Redirecting to <a href={target}>the latest OSCAL reference</a>&hellip;</p>
-    <script set:html={`window.location.replace(${JSON.stringify(target)});`}></script>
+    <script set:html={`window.location.replace(${JSON.stringify(target)});`} />
   </body>
 </html>

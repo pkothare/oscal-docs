@@ -1,8 +1,8 @@
 ---
-import FlagsTable from "./FlagsTable.astro";
-import XmlChildElementsTable from "./XmlChildElementsTable.astro";
-import ConstraintList from "./ConstraintList.astro";
-import type { MetaschemaDefinition } from "../lib/metaschema";
+import FlagsTable from './FlagsTable.astro';
+import XmlChildElementsTable from './XmlChildElementsTable.astro';
+import ConstraintList from './ConstraintList.astro';
+import type { MetaschemaDefinition } from '../lib/metaschema';
 
 interface Props {
   def: MetaschemaDefinition;
@@ -18,8 +18,8 @@ const tag = asRoot ? def.rootName || def.name : def.name;
 <section id={def.name} class="def-section">
   <div class="def-header">
     <span class="def-name">&lt;{tag}&gt;</span>
-    <span class:list={["type-badge", def.type]}>
-      {def.type === "assembly" ? "element" : def.type}
+    <span class:list={['type-badge', def.type]}>
+      {def.type === 'assembly' ? 'element' : def.type}
     </span>
     {asRoot && def.isRoot && <span class="version-badge">root</span>}
   </div>
@@ -33,7 +33,7 @@ const tag = asRoot ? def.rootName || def.name : def.name;
   }
 
   <div class="def-description">
-    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? " " : ""}{def.description}
+    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? ' ' : ''}{def.description}
   </div>
 
   {
@@ -51,11 +51,7 @@ const tag = asRoot ? def.rootName || def.name : def.name;
 
   {def.flags.length > 0 && <FlagsTable flags={def.flags} prefix="@" />}
 
-  {
-    def.modelItems.length > 0 && (
-      <XmlChildElementsTable items={def.modelItems} defMap={defMap} />
-    )
-  }
+  {def.modelItems.length > 0 && <XmlChildElementsTable items={def.modelItems} defMap={defMap} />}
 
   {def.constraints.length > 0 && <ConstraintList constraints={def.constraints} />}
 </section>

@@ -47,6 +47,7 @@ Pushes to `main` trigger the GitHub Actions workflow in [`.github/workflows/`](.
 ## License
 
 The site code is provided as-is. OSCAL itself is a NIST project; consult the [upstream repository](https://github.com/usnistgov/OSCAL) for OSCAL licensing.
+
 # OSCAL Docs
 
 A static documentation site for the [OSCAL](https://pages.nist.gov/OSCAL/) (Open Security Controls Assessment Language) data models, generated directly from the official [NIST OSCAL Metaschema](https://github.com/usnistgov/OSCAL) sources.
@@ -103,6 +104,7 @@ Pushes to `main` trigger the GitHub Actions workflow in [`.github/workflows/`](.
 ## License
 
 The site code is provided as-is. OSCAL itself is a NIST project; consult the [upstream repository](https://github.com/usnistgov/OSCAL) for OSCAL licensing.
+
 # Astro Starter Kit: Minimal
 
 ```sh

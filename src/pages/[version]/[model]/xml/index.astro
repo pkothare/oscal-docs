@@ -1,15 +1,15 @@
 ---
-import BaseLayout from "../../../../layouts/BaseLayout.astro";
-import ModelSidebar from "../../../../components/ModelSidebar.astro";
-import XmlOutline from "../../../../components/XmlOutline.astro";
-import XmlDefinitionSection from "../../../../components/XmlDefinitionSection.astro";
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ModelSidebar from '../../../../components/ModelSidebar.astro';
+import XmlOutline from '../../../../components/XmlOutline.astro';
+import XmlDefinitionSection from '../../../../components/XmlDefinitionSection.astro';
 import {
   getOscalVersions,
   MODEL_FILES,
   MODEL_DISPLAY_NAMES,
   resolveModel,
   type ResolvedModel,
-} from "../../../../lib/metaschema";
+} from '../../../../lib/metaschema';
 
 export async function getStaticPaths() {
   const versions = await getOscalVersions();
@@ -73,20 +73,12 @@ const defMap = new Map(resolved.definitions.map((d) => [d.name, d]));
         )
       }
 
-      {
-        rootDef && rootDef.modelItems.length > 0 && (
-          <XmlOutline rootDef={rootDef} defMap={defMap} />
-        )
-      }
+      {rootDef && rootDef.modelItems.length > 0 && <XmlOutline rootDef={rootDef} defMap={defMap} />}
 
       {rootDef && <XmlDefinitionSection def={rootDef} defMap={defMap} asRoot />}
 
       <h2>Element Definitions ({otherDefs.length})</h2>
-      {
-        otherDefs.map((def) => (
-          <XmlDefinitionSection def={def} defMap={defMap} />
-        ))
-      }
+      {otherDefs.map((def) => <XmlDefinitionSection def={def} defMap={defMap} />)}
     </div>
   </div>
 </BaseLayout>
