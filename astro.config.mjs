@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import { getOscalVersions, getLatestVersion } from './src/lib/metaschema.ts';
+import { getOscalVersions, getLatestVersion } from './src/lib/metaschema/index.ts';
 
 const versions = await getOscalVersions();
 const latest = await getLatestVersion();

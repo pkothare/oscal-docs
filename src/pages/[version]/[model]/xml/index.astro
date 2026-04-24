@@ -15,7 +15,7 @@ export async function getStaticPaths() {
   const versions = await getOscalVersions();
   const paths: { params: { version: string; model: string } }[] = [];
   for (const version of versions) {
-    for (const model of Object.keys(MODEL_FILES)) {
+    for (const model of MODEL_FILES.keys()) {
       paths.push({ params: { version, model } });
     }
   }
@@ -33,7 +33,7 @@ try {
   error = e instanceof Error ? e.message : String(e);
   resolved = {
     name: modelSlug!,
-    displayName: MODEL_DISPLAY_NAMES[modelSlug!] || modelSlug!,
+    displayName: MODEL_DISPLAY_NAMES.get(modelSlug!) ?? modelSlug!,
     version: version!,
     definitions: [],
   };

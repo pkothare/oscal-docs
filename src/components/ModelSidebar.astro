@@ -16,7 +16,7 @@ const { base, version, modelSlug, format, definitions } = Astro.props;
   <div class="sidebar-section">
     <div class="sidebar-title">Models</div>
     {
-      Object.entries(MODEL_DISPLAY_NAMES).map(([slug, name]) => (
+      Array.from(MODEL_DISPLAY_NAMES.entries()).map(([slug, name]) => (
         <a
           href={`${base}${version}/${slug}/${format}/`}
           class:list={['sidebar-link', slug === modelSlug && 'active']}
