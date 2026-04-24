@@ -1,6 +1,5 @@
 ---
-import FlagsTable from './FlagsTable.astro';
-import JsonPropertiesTable from './JsonPropertiesTable.astro';
+import JsonKeysTable from './JsonKeysTable.astro';
 import ConstraintList from './ConstraintList.astro';
 import type { MetaschemaDefinition } from '../lib/metaschema';
 
@@ -53,9 +52,11 @@ const displayName = asRoot ? def.rootName || def.name : def.name;
       ))
   }
 
-  {def.flags.length > 0 && <FlagsTable flags={def.flags} />}
-
-  {def.modelItems.length > 0 && <JsonPropertiesTable items={def.modelItems} defMap={defMap} />}
+  {
+    (def.flags.length > 0 || def.modelItems.length > 0) && (
+      <JsonKeysTable flags={def.flags} items={def.modelItems} defMap={defMap} />
+    )
+  }
 
   {def.constraints.length > 0 && <ConstraintList constraints={def.constraints} />}
 </section>
