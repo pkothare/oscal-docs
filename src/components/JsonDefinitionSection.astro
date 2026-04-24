@@ -18,7 +18,7 @@ const displayName = asRoot ? def.rootName || def.name : def.name;
 ---
 
 <section id={def.name} class="def-section">
-  {aliases.map((alias) => <a id={alias} class="anchor-alias" />)}
+  {aliases.map((alias: string) => <a id={alias} class="anchor-alias" />)}
 
   <div class="def-header">
     <span class="def-name">{displayName}</span>

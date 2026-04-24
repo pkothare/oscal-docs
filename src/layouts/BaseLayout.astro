@@ -115,14 +115,14 @@ const latest = version ? await getLatestVersion() : "";
     <script is:inline>
       (function () {
         function updateFragmentActive() {
-          var hash = window.location.hash;
+          const hash = window.location.hash;
           document.querySelectorAll('.sidebar-link.fragment-active').forEach(function (el) {
             el.classList.remove('fragment-active');
           });
           if (!hash || hash.length < 2) return;
           document.querySelectorAll('.sidebar-link').forEach(function (el) {
-            var href = el.getAttribute('href') || '';
-            var idx = href.indexOf('#');
+            const href = el.getAttribute('href') || '';
+            const idx = href.indexOf('#');
             if (idx >= 0 && href.slice(idx) === hash) {
               el.classList.add('fragment-active');
             }
@@ -133,9 +133,9 @@ const latest = version ? await getLatestVersion() : "";
         updateFragmentActive();
 
         function setupSidebarToggle() {
-          var btn = document.querySelector('.hamburger');
-          var backdrop = document.querySelector('.sidebar-backdrop');
-          var sidebar = document.querySelector('.sidebar');
+          const btn = document.querySelector('.hamburger');
+          const backdrop = document.querySelector('.sidebar-backdrop');
+          const sidebar = document.querySelector('.sidebar');
           if (!btn) return;
           if (!sidebar) {
             btn.hidden = true;
@@ -157,7 +157,7 @@ const latest = version ? await getLatestVersion() : "";
           });
           if (backdrop) backdrop.addEventListener('click', close);
           sidebar.addEventListener('click', function (e) {
-            var t = e.target;
+            let t = e.target;
             while (t && t !== sidebar) {
               if (t.tagName === 'A') { close(); return; }
               t = t.parentNode;

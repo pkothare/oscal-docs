@@ -29,8 +29,8 @@ let resolved: ResolvedModel;
 let error: string | null = null;
 try {
   resolved = await resolveModel(modelSlug!, version!);
-} catch (e: any) {
-  error = e.message;
+} catch (e) {
+  error = e instanceof Error ? e.message : String(e);
   resolved = {
     name: modelSlug!,
     displayName: MODEL_DISPLAY_NAMES[modelSlug!] || modelSlug!,

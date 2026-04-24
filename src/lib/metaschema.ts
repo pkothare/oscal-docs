@@ -143,6 +143,7 @@ export interface ParsedMetaschema {
   definitions: MetaschemaDefinition[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractText(node: any): string {
   if (!node) return '';
   if (typeof node === 'string') return node;
@@ -169,6 +170,7 @@ function extractText(node: any): string {
   return String(node);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseFlags(node: any): FieldDef[] {
   const flags: FieldDef[] = [];
   const definedFlags = node['define-flag'];
@@ -188,6 +190,7 @@ function parseFlags(node: any): FieldDef[] {
   return flags;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): ModelItem[] {
   if (!modelNode) return [];
   const model = Array.isArray(modelNode) ? modelNode[0] : modelNode;
@@ -262,6 +265,7 @@ function parseModelItems(modelNode: any, collected?: MetaschemaDefinition[]): Mo
   return items;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseConstraints(constraintNode: any): ConstraintDef[] {
   if (!constraintNode) return [];
   const constraints: ConstraintDef[] = [];
@@ -406,7 +410,7 @@ async function fetchEntity(baseUrl: string, relPath: string): Promise<string> {
 
 // Resolve <!DOCTYPE ...> external entities so fast-xml-parser can read the document.
 async function resolveExternalEntities(xml: string, baseUrl: string): Promise<string> {
-  const doctypeMatch = xml.match(/<!DOCTYPE[^\[]*\[([\s\S]*?)\]\s*>/);
+  const doctypeMatch = xml.match(/<!DOCTYPE[^[]*\[([\s\S]*?)\]\s*>/);
   if (!doctypeMatch) return xml;
   const decls = doctypeMatch[1];
   const entityRe = /<!ENTITY\s+([\w-]+)\s+SYSTEM\s+"([^"]+)"\s*>/g;
