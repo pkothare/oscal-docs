@@ -41,7 +41,6 @@ try {
 }
 
 const rootDef = resolved.rootDefinition;
-const otherDefs = resolved.definitions.filter((d) => d !== rootDef);
 const defMap = new Map(resolved.definitions.map((d) => [d.name, d]));
 
 // JSON serialization name of a model item (group-as for arrays/maps, otherwise ref/name).
@@ -65,8 +64,7 @@ function collectAliases(items: ModelItem[]) {
     }
   }
 }
-if (rootDef) collectAliases(rootDef.modelItems);
-for (const def of otherDefs) collectAliases(def.modelItems);
+for (const def of resolved.definitions) collectAliases(def.modelItems);
 ---
 
 <BaseLayout
@@ -81,7 +79,7 @@ for (const def of otherDefs) collectAliases(def.modelItems);
       version={version!}
       modelSlug={modelSlug!}
       format="json"
-      definitions={otherDefs}
+      definitions={resolved.definitions}
     />
 
     <div class="content">
@@ -104,11 +102,9 @@ for (const def of otherDefs) collectAliases(def.modelItems);
         )
       }
 
-      {rootDef && <JsonDefinitionSection def={rootDef} defMap={defMap} asRoot />}
-
-      <h2>Definitions ({otherDefs.length})</h2>
+      <h2>Definitions ({resolved.definitions.length})</h2>
       {
-        otherDefs.map((def) => (
+        resolved.definitions.map((def) => (
           <JsonDefinitionSection
             def={def}
             defMap={defMap}

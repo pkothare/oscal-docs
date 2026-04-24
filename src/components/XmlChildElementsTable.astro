@@ -53,7 +53,7 @@ function cardinality(item: ModelItem): string {
                 <td>
                   <span class="cardinality">{cardinality(item)}</span>
                 </td>
-                <td>{refDef?.description || item.description || ''}</td>
+                <td set:html={refDef?.description || item.description || ''} />
               </tr>
             );
           })

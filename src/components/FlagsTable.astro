@@ -36,7 +36,7 @@ const { flags, prefix = '' } = Astro.props;
                 <span class="type-badge flag">{flag.asType || 'string'}</span>
               </td>
               <td>{flag.required ? 'Yes' : 'No'}</td>
-              <td>{flag.description}</td>
+              <td set:html={flag.description} />
             </tr>
           ))
         }

@@ -33,7 +33,7 @@ const tag = asRoot ? def.rootName || def.name : def.name;
   }
 
   <div class="def-description">
-    {asRoot && <strong>DESCRIPTION</strong>}{asRoot ? ' ' : ''}{def.description}
+    {asRoot && <strong>DESCRIPTION </strong>}<span set:html={def.description} />
   </div>
 
   {
@@ -42,10 +42,10 @@ const tag = asRoot ? def.rootName || def.name : def.name;
         <div class="def-remarks">
           <strong>Remarks</strong>
           <br />
-          {def.remarks}
+          <span set:html={def.remarks} />
         </div>
       ) : (
-        <div class="def-remarks">{def.remarks}</div>
+        <div class="def-remarks" set:html={def.remarks} />
       ))
   }
 

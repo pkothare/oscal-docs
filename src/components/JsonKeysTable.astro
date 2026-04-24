@@ -50,7 +50,7 @@ const total = flags.length + items.length;
               <td>
                 <span class="cardinality">{flag.required ? '[1]' : '[0 or 1]'}</span>
               </td>
-              <td>{flag.description}</td>
+              <td set:html={flag.description} />
             </tr>
           ))
         }
@@ -70,7 +70,7 @@ const total = flags.length + items.length;
                 <td>
                   <span class="cardinality">{cardinality(item)}</span>
                 </td>
-                <td>{refDef?.description || item.description || ''}</td>
+                <td set:html={refDef?.description || item.description || ''} />
               </tr>
             );
           })

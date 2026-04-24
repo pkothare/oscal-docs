@@ -21,12 +21,12 @@ const { constraints } = Astro.props;
               for <code>{c.target}</code>
             </span>
           )}
-          {c.description && <span> — {c.description}</span>}
+          {c.description && <span set:html={` ${c.description}`} />}
           {c.values && c.values.length > 0 && (
             <ul class="enum-list">
               {c.values.map((v) => (
                 <li>
-                  <span class="enum-value">{v.value}</span>: {v.description}
+                  <span class="enum-value">{v.value}</span>: <span set:html={v.description} />
                 </li>
               ))}
             </ul>
